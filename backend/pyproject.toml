@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "gen_ui_backend"
+version = "0.1.0"
+description = ""
+authors = ["Connor Haines <connor_haines@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+langchain-core = "^0.3.10"
+langgraph = "^0.2.35"
+langserve = "^0.3.0"
+python-dotenv = "^1.0.1"
+uvicorn = "^0.31.1"
+fastapi = "^0.115.0"
+pydantic = "^2.9.2"
+langchain-openai = "^0.2.2"
+langchain-community = "^0.3.2"
+typer = "^0.12.5"
+sse-starlette = "^2.1.3"
+
+
+[tool.poetry.scripts]
+start = "gen_ui_backend.server:start"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
