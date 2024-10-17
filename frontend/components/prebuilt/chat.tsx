@@ -22,7 +22,6 @@ export default function Chat() {
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [history, setHistory] = useState<[role: string, content: string][]>([]);
   const [input, setInput] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File>();
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
@@ -33,7 +32,7 @@ export default function Chat() {
     });
 
     newElements.push(
-      <div className="flex flex-col w-full gap-1 mt-auto" key={history.length}>
+      <div className="flex flex-col w-full gap-1 mt-auto" key={elements.length}>
         <HumanMessageText content={input} />
         <div className="flex flex-col gap-1 w-full max-w-fit mr-auto">
           {element.ui}
