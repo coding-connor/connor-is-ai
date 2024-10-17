@@ -37,7 +37,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
   }
 ) {
   const ui = createStreamableUI();
-  const [lastEvent, resolve] = withResolvers<
+  const [lastEvent, resolve, reject] = withResolvers<
     Array<any> | Record<string, any>
   >();
   let shouldRecordLastEvent = true;
@@ -46,35 +46,38 @@ export function streamRunnableUI<RunInput, RunOutput>(
     let lastEventValue: StreamEvent | null = null;
     const callbacks: RunUICallbacks = {};
 
-    for await (const streamEvent of (
-      runnable as Runnable<RunInput, RunOutput>
-    ).streamEvents(inputs, {
-      version: "v1",
-    })) {
-      for await (const handler of options.eventHandlers) {
-        await handler(streamEvent, {
-          ui,
-          callbacks,
-        });
+    try {
+      for await (const streamEvent of (
+        runnable as Runnable<RunInput, RunOutput>
+      ).streamEvents(inputs, {
+        version: "v1",
+      })) {
+        for await (const handler of options.eventHandlers) {
+          await handler(streamEvent, {
+            ui,
+            callbacks,
+          });
+        }
+        if (shouldRecordLastEvent) {
+          lastEventValue = streamEvent;
+        }
+        if (
+          streamEvent.data.chunk?.name === "LangGraph" &&
+          streamEvent.data.chunk?.event === "on_chain_end"
+        ) {
+          shouldRecordLastEvent = false;
+        }
       }
-      if (shouldRecordLastEvent) {
-        lastEventValue = streamEvent;
-      }
-      if (
-        streamEvent.data.chunk?.name === "LangGraph" &&
-        streamEvent.data.chunk?.event === "on_chain_end"
-      ) {
-        shouldRecordLastEvent = false;
-      }
-    }
 
-    // resolve the promise, which will be sent
-    // to the client thanks to RSC
-    const resolveValue =
-      lastEventValue?.data.output || lastEventValue?.data.chunk?.data?.output;
-    resolve(resolveValue);
-    Object.values(callbacks).forEach((cb) => cb.done());
-    ui.done();
+      const resolveValue =
+        lastEventValue?.data.output || lastEventValue?.data.chunk?.data?.output;
+      resolve(resolveValue);
+    } catch (error) {
+      console.error("Error during streaming:", error);
+    } finally {
+      Object.values(callbacks).forEach((cb) => cb.done());
+      ui.done();
+    }
   })();
 
   return { ui: ui.value, lastEvent };

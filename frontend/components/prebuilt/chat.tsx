@@ -8,7 +8,6 @@ import { useActions } from "@/utils/client";
 import { LocalContext } from "@/app/shared";
 import { RemoteRunnable } from "@langchain/core/runnables/remote";
 import { Github, GithubLoading } from "./github";
-import { Invoice, InvoiceLoading } from "./invoice";
 import { CurrentWeather, CurrentWeatherLoading } from "./weather";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
@@ -16,28 +15,6 @@ import { AIMessage } from "@/ai/message";
 import { HumanMessageText } from "./message";
 
 export interface ChatProps {}
-
-function convertFileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64String = reader.result as string;
-      resolve(base64String.split(",")[1]); // Remove the data URL prefix
-    };
-    reader.onerror = (error) => {
-      reject(error);
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function FileUploadMessage({ file }: { file: File }) {
-  return (
-    <div className="flex w-full max-w-fit ml-auto">
-      <p>File uploaded: {file.name}</p>
-    </div>
-  );
-}
 
 export default function Chat() {
   const actions = useActions<typeof EndpointsContext>();
@@ -49,31 +26,19 @@ export default function Chat() {
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
-    let base64File: string | undefined = undefined;
-    let fileExtension = selectedFile?.type.split("/")[1];
-    if (selectedFile) {
-      base64File = await convertFileToBase64(selectedFile);
-    }
+
     const element = await actions.agent({
       input,
       chat_history: history,
-      file:
-        base64File && fileExtension
-          ? {
-              base64: base64File,
-              extension: fileExtension,
-            }
-          : undefined,
     });
 
     newElements.push(
       <div className="flex flex-col w-full gap-1 mt-auto" key={history.length}>
-        {selectedFile && <FileUploadMessage file={selectedFile} />}
         <HumanMessageText content={input} />
         <div className="flex flex-col gap-1 w-full max-w-fit mr-auto">
           {element.ui}
         </div>
-      </div>,
+      </div>
     );
 
     // consume the value stream to obtain the final string value
@@ -110,7 +75,6 @@ export default function Chat() {
 
     setElements(newElements);
     setInput("");
-    setSelectedFile(undefined);
   }
 
   return (
@@ -131,19 +95,6 @@ export default function Chat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        <div className="w-[300px]">
-          <Input
-            placeholder="Upload"
-            id="image"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files && e.target.files.length > 0) {
-                setSelectedFile(e.target.files[0]);
-              }
-            }}
-          />
-        </div>
         <Button type="submit">Submit</Button>
       </form>
     </div>

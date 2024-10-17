@@ -33,8 +33,8 @@ def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> Generative
             MessagesPlaceholder("input"),
         ]
     )
-    model = ChatOpenAI(model="gpt-4o", temperature=0, streaming=True)
-    tools = [github_repo, invoice_parser, weather_data]
+    model = ChatOpenAI(model="gpt-4o-mini", temperature=0, streaming=True)
+    tools = [github_repo, weather_data]
     model_with_tools = model.bind_tools(tools)
     chain = initial_prompt | model_with_tools
     result = chain.invoke({"input": state["input"]}, config)

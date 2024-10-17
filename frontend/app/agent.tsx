@@ -4,7 +4,6 @@ import "server-only";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { EventHandlerFields } from "@/utils/server";
 import { Github, GithubLoading } from "@/components/prebuilt/github";
-import { InvoiceLoading, Invoice } from "@/components/prebuilt/invoice";
 import {
   CurrentWeatherLoading,
   CurrentWeather,
@@ -27,10 +26,6 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   "github-repo": {
     loading: (props?: any) => <GithubLoading {...props} />,
     final: (props?: any) => <Github {...props} />,
-  },
-  "invoice-parser": {
-    loading: (props?: any) => <InvoiceLoading {...props} />,
-    final: (props?: any) => <Invoice {...props} />,
   },
   "weather-data": {
     loading: (props?: any) => <CurrentWeatherLoading {...props} />,
