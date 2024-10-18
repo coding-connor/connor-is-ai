@@ -79,7 +79,7 @@ export default function Chat() {
         ]);
       } else if (lastEvent.input && lastEvent.result) {
         console.log("in here 7");
-        // Currently in testing this is the only part of the code I'm reaching. It could be different with tool calls, so I'll leave the above for now. 
+        // Currently in testing this is the only part of the code I'm reaching. It could be different with tool calls, so I'll leave the above for now.
         setHistory((prev) => [
           ...prev,
           ["human", input],
@@ -108,7 +108,7 @@ export default function Chat() {
         className="w-full flex flex-row gap-2"
       >
         <Input
-          placeholder="What's the weather like in San Francisco?"
+          placeholder="What are you looking for in your next job?"
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />

@@ -22,6 +22,8 @@ type ToolComponentMap = {
   [tool: string]: ToolComponent;
 };
 
+type EventHandler = (event: StreamEvent, ...args: any[]) => void;
+
 const TOOL_COMPONENT_MAP: ToolComponentMap = {
   "github-repo": {
     loading: (props?: any) => <GithubLoading {...props} />,
@@ -33,6 +35,32 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   },
 };
 
+function isInvokeModelEvent(type: string, event: StreamEvent): boolean {
+  return (
+    type === "end" &&
+    event.data.output &&
+    typeof event.data.output === "object" &&
+    event.name === "invoke_model"
+  );
+}
+
+function isInvokeToolsEvent(type: string, event: StreamEvent): boolean {
+  return (
+    type === "end" &&
+    event.data.output &&
+    typeof event.data.output === "object" &&
+    event.name === "invoke_tools"
+  );
+}
+
+function isChatModelStreamEvent(event: StreamEvent): boolean {
+  return (
+    event.event === "on_chat_model_stream" &&
+    event.data.chunk &&
+    typeof event.data.chunk === "object"
+  );
+}
+
 async function agent(inputs: {
   input: string;
   chat_history: [role: string, content: string][];
@@ -42,8 +70,11 @@ async function agent(inputs: {
     url: API_URL,
   });
 
+  // Note: The selected tool component and UI are stored in the outer scope, allows for mutation to maximize performance
   let selectedToolComponent: ToolComponent | null = null;
   let selectedToolUI: ReturnType<typeof createStreamableUI> | null = null;
+
+  console.log("chat history", inputs.chat_history);
 
   /**
    * Handles the 'invoke_model' event by checking for tool calls in the output.
@@ -52,20 +83,12 @@ async function agent(inputs: {
    *
    * @param output - The output object from the 'invoke_model' event
    */
-  const handleInvokeModelEvent = (
+  const handleInvokeModelEvent: EventHandler = (
     event: StreamEvent,
-    fields: EventHandlerFields
+    fields: EventHandlerFields,
+    selectedToolComponent: ToolComponent | null,
+    selectedToolUI: ReturnType<typeof createStreamableUI> | null
   ) => {
-    const [type] = event.event.split("_").slice(2);
-    if (
-      type !== "end" ||
-      !event.data.output ||
-      typeof event.data.output !== "object" ||
-      event.name !== "invoke_model"
-    ) {
-      return;
-    }
-
     if (
       "tool_calls" in event.data.output &&
       event.data.output.tool_calls.length > 0
@@ -85,17 +108,12 @@ async function agent(inputs: {
    *
    * @param output - The output object from the 'invoke_tools' event
    */
-  const handleInvokeToolsEvent = (event: StreamEvent) => {
-    const [type] = event.event.split("_").slice(2);
-    if (
-      type !== "end" ||
-      !event.data.output ||
-      typeof event.data.output !== "object" ||
-      event.name !== "invoke_tools"
-    ) {
-      return;
-    }
-
+  const handleInvokeToolsEvent: EventHandler = (
+    event: StreamEvent,
+    fields: EventHandlerFields,
+    selectedToolComponent: ToolComponent | null,
+    selectedToolUI: ReturnType<typeof createStreamableUI> | null
+  ) => {
     if (selectedToolUI && selectedToolComponent) {
       const toolData = event.data.output.tool_result;
       selectedToolUI.done(selectedToolComponent.final(toolData));
@@ -110,16 +128,10 @@ async function agent(inputs: {
    * @param streamEvent - The stream event object
    * @param chunk - The chunk object containing the content
    */
-  const handleChatModelStreamEvent = (
+  const handleChatModelStreamEvent: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields
   ) => {
-    if (
-      event.event !== "on_chat_model_stream" ||
-      !event.data.chunk ||
-      typeof event.data.chunk !== "object"
-    )
-      return;
     if (!fields.callbacks[event.run_id]) {
       const textStream = createStreamableValue();
       fields.ui.append(<AIMessage value={textStream.value} />);
@@ -131,7 +143,22 @@ async function agent(inputs: {
     }
   };
 
-  console.log("chat history", inputs.chat_history);
+  const dispatchEventHandlers: EventHandler = (
+    event: StreamEvent,
+    fields: EventHandlerFields
+  ) => {
+    const [type] = event.event.split("_").slice(2);
+
+    if (isInvokeModelEvent(type, event)) {
+      handleInvokeModelEvent(event, fields);
+    }
+    if (isInvokeToolsEvent(type, event)) {
+      handleInvokeToolsEvent(event, fields);
+    }
+    if (isChatModelStreamEvent(event)) {
+      handleChatModelStreamEvent(event, fields);
+    }
+  };
 
   return streamRunnableUI(
     remoteRunnable,
@@ -148,11 +175,7 @@ async function agent(inputs: {
       ],
     },
     {
-      eventHandlers: [
-        handleInvokeModelEvent,
-        handleInvokeToolsEvent,
-        handleChatModelStreamEvent,
-      ],
+      dispatchEventHandlers,
     }
   );
 }

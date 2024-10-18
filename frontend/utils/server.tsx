@@ -16,7 +16,7 @@ export type EventHandlerFields = {
   ui: ReturnType<typeof createStreamableUI>;
   callbacks: RunUICallbacks;
 };
-export type EventHandler =
+export type DispatchEventHandlers =
   | ((event: StreamEvent, fields: EventHandlerFields) => void)
   | ((event: StreamEvent, fields: EventHandlerFields) => Promise<void>);
 
@@ -33,9 +33,10 @@ export function streamRunnableUI<RunInput, RunOutput>(
     | CompiledStateGraph<RunInput, Partial<RunInput>>,
   inputs: RunInput,
   options: {
-    eventHandlers: Array<EventHandler>;
+    dispatchEventHandlers: DispatchEventHandlers;
   }
 ) {
+  // Note: We will mutate this object in the future
   const ui = createStreamableUI();
   const [lastEvent, resolve, reject] = withResolvers<
     Array<any> | Record<string, any>
@@ -52,15 +53,15 @@ export function streamRunnableUI<RunInput, RunOutput>(
       ).streamEvents(inputs, {
         version: "v1",
       })) {
-        for await (const handler of options.eventHandlers) {
-          await handler(streamEvent, {
-            ui,
-            callbacks,
-          });
-        }
+        await options.dispatchEventHandlers(streamEvent, {
+          ui,
+          callbacks,
+        });
+        console.log("Stream event:", streamEvent);
         if (shouldRecordLastEvent) {
           lastEventValue = streamEvent;
         }
+        // I'm not sure what this is doing. It would need to get another event that it skips recording to be useful. Also, I'm not sure what would make the name LangGraph. Currently I get /chat in testing, but again maybe it's relevant for tooling.
         if (
           streamEvent.data.chunk?.name === "LangGraph" &&
           streamEvent.data.chunk?.event === "on_chain_end"
@@ -69,6 +70,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
         }
       }
 
+      console.log("Last event value:", lastEventValue);
       const resolveValue =
         lastEventValue?.data.output || lastEventValue?.data.chunk?.data?.output;
       // Sets the value of lastEvent
