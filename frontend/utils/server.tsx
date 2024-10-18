@@ -71,6 +71,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
 
       const resolveValue =
         lastEventValue?.data.output || lastEventValue?.data.chunk?.data?.output;
+      // Sets the value of lastEvent
       resolve(resolveValue);
     } catch (error) {
       console.error("Error during streaming:", error);

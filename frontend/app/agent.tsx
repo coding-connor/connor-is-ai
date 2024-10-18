@@ -36,10 +36,6 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
 async function agent(inputs: {
   input: string;
   chat_history: [role: string, content: string][];
-  file?: {
-    base64: string;
-    extension: string;
-  };
 }) {
   "use server";
   const remoteRunnable = new RemoteRunnable({
@@ -134,6 +130,8 @@ async function agent(inputs: {
       fields.callbacks[event.run_id].append(event.data.chunk.content);
     }
   };
+
+  console.log("chat history", inputs.chat_history);
 
   return streamRunnableUI(
     remoteRunnable,
