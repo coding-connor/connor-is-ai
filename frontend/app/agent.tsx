@@ -3,11 +3,11 @@ import { exposeEndpoints, streamRunnableUI } from "@/utils/server";
 import "server-only";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { EventHandlerFields } from "@/utils/server";
-import { Github, GithubLoading } from "@/components/prebuilt/github";
+import { Github, GithubLoading } from "@/components/chat/github";
 import {
   CurrentWeatherLoading,
   CurrentWeather,
-} from "@/components/prebuilt/weather";
+} from "@/components/chat/weather";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { AIMessage } from "@/ai/message";
 
@@ -20,6 +20,11 @@ type ToolComponent = {
 
 type ToolComponentMap = {
   [tool: string]: ToolComponent;
+};
+
+type ToolState = {
+  selectedToolComponent: ToolComponent | null;
+  selectedToolUI: ReturnType<typeof createStreamableUI> | null;
 };
 
 type EventHandler = (event: StreamEvent, ...args: any[]) => void;
@@ -70,64 +75,51 @@ async function agent(inputs: {
     url: API_URL,
   });
 
-  // Note: The selected tool component and UI are stored in the outer scope, allows for mutation to maximize performance
-  let selectedToolComponent: ToolComponent | null = null;
-  let selectedToolUI: ReturnType<typeof createStreamableUI> | null = null;
+  // Note: The selected tool component and UI are stored in the outer scope, this allows for mutation to maximize performance
+  const toolState: ToolState = {
+    selectedToolComponent: null,
+    selectedToolUI: null,
+  };
 
-  console.log("chat history", inputs.chat_history);
-
-  /**
-   * Handles the 'invoke_model' event by checking for tool calls in the output.
-   * If a tool call is found and no tool component is selected yet, it sets the
-   * selected tool component based on the tool type and appends its loading state to the UI.
-   *
-   * @param output - The output object from the 'invoke_model' event
-   */
   const handleInvokeModelEvent: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields,
-    selectedToolComponent: ToolComponent | null,
-    selectedToolUI: ReturnType<typeof createStreamableUI> | null
+    toolState: ToolState
   ) => {
     if (
       "tool_calls" in event.data.output &&
       event.data.output.tool_calls.length > 0
     ) {
       const toolCall = event.data.output.tool_calls[0];
-      if (!selectedToolComponent && !selectedToolUI) {
-        selectedToolComponent = TOOL_COMPONENT_MAP[toolCall.type];
-        selectedToolUI = createStreamableUI(selectedToolComponent.loading());
-        fields.ui.append(selectedToolUI?.value);
+      if (!toolState.selectedToolComponent && !toolState.selectedToolUI) {
+        toolState.selectedToolComponent = TOOL_COMPONENT_MAP[toolCall.type];
+        toolState.selectedToolUI = createStreamableUI(
+          toolState.selectedToolComponent.loading()
+        );
+        console.log("setting...");
+        console.log(toolState.selectedToolComponent);
+        console.log(toolState.selectedToolUI);
+        fields.ui.append(toolState.selectedToolUI?.value);
       }
     }
   };
 
-  /**
-   * Handles the 'invoke_tools' event by updating the selected tool's UI
-   * with the final state and tool result data.
-   *
-   * @param output - The output object from the 'invoke_tools' event
-   */
   const handleInvokeToolsEvent: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields,
-    selectedToolComponent: ToolComponent | null,
-    selectedToolUI: ReturnType<typeof createStreamableUI> | null
+    toolState: ToolState
   ) => {
-    if (selectedToolUI && selectedToolComponent) {
+    console.log(event.data.output.tool_result);
+    console.log(toolState.selectedToolComponent);
+    console.log(toolState.selectedToolUI);
+    if (toolState.selectedToolUI && toolState.selectedToolComponent) {
       const toolData = event.data.output.tool_result;
-      selectedToolUI.done(selectedToolComponent.final(toolData));
+      toolState.selectedToolUI.done(
+        toolState.selectedToolComponent.final(toolData)
+      );
     }
   };
 
-  /**
-   * Handles the 'on_chat_model_stream' event by creating a new text stream
-   * for the AI message if one doesn't exist for the current run ID.
-   * It then appends the chunk content to the corresponding text stream.
-   *
-   * @param streamEvent - The stream event object
-   * @param chunk - The chunk object containing the content
-   */
   const handleChatModelStreamEvent: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields
@@ -150,10 +142,12 @@ async function agent(inputs: {
     const [type] = event.event.split("_").slice(2);
 
     if (isInvokeModelEvent(type, event)) {
-      handleInvokeModelEvent(event, fields);
+      console.log("Invoke model event:", event);
+      handleInvokeModelEvent(event, fields, toolState);
     }
     if (isInvokeToolsEvent(type, event)) {
-      handleInvokeToolsEvent(event, fields);
+      console.log("Invoke tools event:", event);
+      handleInvokeToolsEvent(event, fields, toolState);
     }
     if (isChatModelStreamEvent(event)) {
       handleChatModelStreamEvent(event, fields);

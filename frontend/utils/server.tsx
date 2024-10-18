@@ -53,11 +53,8 @@ export function streamRunnableUI<RunInput, RunOutput>(
       ).streamEvents(inputs, {
         version: "v1",
       })) {
-        await options.dispatchEventHandlers(streamEvent, {
-          ui,
-          callbacks,
-        });
-        console.log("Stream event:", streamEvent);
+        const fields: EventHandlerFields = { ui, callbacks };
+        await options.dispatchEventHandlers(streamEvent, fields);
         if (shouldRecordLastEvent) {
           lastEventValue = streamEvent;
         }
