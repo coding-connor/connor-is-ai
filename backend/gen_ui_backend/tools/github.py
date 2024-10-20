@@ -36,4 +36,4 @@ def github_repo(owner: str, repo: str) -> Union[Dict, str]:
         }
     except requests.exceptions.RequestException as err:
         print(err)
-        return "There was an error fetching the repository. Please check the owner and repo names."
+        return {"error": "There was an error fetching the repository. Please check the owner and repo names."}

@@ -3,7 +3,7 @@ import { exposeEndpoints, streamRunnableUI } from "@/utils/server";
 import "server-only";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { EventHandlerFields } from "@/utils/server";
-import { Github, GithubLoading } from "@/components/chat/github";
+import { Github, GithubLoading, GithubProps } from "@/components/chat/github";
 import {
   CurrentWeatherLoading,
   CurrentWeather,
@@ -13,9 +13,10 @@ import { AIMessage } from "@/ai/message";
 
 const API_URL = "http://localhost:8000/chat";
 
-type ToolComponent = {
-  loading: (props?: any) => JSX.Element;
-  final: (props?: any) => JSX.Element;
+type ToolComponent<T = any> = {
+  loading: (props?: T) => JSX.Element;
+  final: (props?: T) => JSX.Element;
+  error?: (props?: T) => JSX.Element;
 };
 
 type ToolComponentMap = {
@@ -33,6 +34,7 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   "github-repo": {
     loading: (props?: any) => <GithubLoading {...props} />,
     final: (props?: any) => <Github {...props} />,
+    error: (props?: any) => <div>Error: {...props}</div>,
   },
   "weather-data": {
     loading: (props?: any) => <CurrentWeatherLoading {...props} />,
@@ -96,9 +98,6 @@ async function agent(inputs: {
         toolState.selectedToolUI = createStreamableUI(
           toolState.selectedToolComponent.loading()
         );
-        console.log("setting...");
-        console.log(toolState.selectedToolComponent);
-        console.log(toolState.selectedToolUI);
         fields.ui.append(toolState.selectedToolUI?.value);
       }
     }
@@ -109,11 +108,14 @@ async function agent(inputs: {
     fields: EventHandlerFields,
     toolState: ToolState
   ) => {
-    console.log(event.data.output.tool_result);
-    console.log(toolState.selectedToolComponent);
-    console.log(toolState.selectedToolUI);
     if (toolState.selectedToolUI && toolState.selectedToolComponent) {
       const toolData = event.data.output.tool_result;
+      if (toolData.error) {
+        toolState.selectedToolUI.done(
+          toolState.selectedToolComponent.error(toolData.error)
+        );
+        return;
+      }
       toolState.selectedToolUI.done(
         toolState.selectedToolComponent.final(toolData)
       );

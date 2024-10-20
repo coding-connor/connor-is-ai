@@ -13,7 +13,7 @@ import {
 import { Skeleton } from "../ui/skeleton";
 import { format } from "date-fns";
 
-export interface DemoGithubProps {
+export interface GithubProps {
   owner: string;
   repo: string;
   description: string;
@@ -51,7 +51,7 @@ export function GithubLoading(): JSX.Element {
   );
 }
 
-export function Github(props: DemoGithubProps): JSX.Element {
+export function Github(props: GithubProps): JSX.Element {
   const currentMonth = format(new Date(), "MMMM");
   const currentYear = format(new Date(), "yyyy");
   return (

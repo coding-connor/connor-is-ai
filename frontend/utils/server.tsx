@@ -75,6 +75,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
     } catch (error) {
       console.error("Error during streaming:", error);
     } finally {
+      // This ensures the createStreamableValue stream finishes.
       Object.values(callbacks).forEach((cb) => cb.done());
       ui.done();
     }
