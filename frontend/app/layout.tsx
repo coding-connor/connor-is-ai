@@ -13,7 +13,7 @@ export default function RootLayout(props: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <div className="flex flex-col p-4 md:p-12 h-[100vh]">
+        <div className="flex flex-col p-0 md:p-12 h-[100vh] dark:bg-slate-800">
           <EndpointsContext>{props.children}</EndpointsContext>
         </div>
       </body>
