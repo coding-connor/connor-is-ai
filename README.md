@@ -54,7 +54,7 @@ Once a conversation is finished, several things happen:
 
 - The primary AI Agent has at its disposal several tools to enrich the conversation:
   -- It can search the web for additional helpful context when answering questions
-  -- It can use the Calendry tool to create a UI widgent wherein the user can sign up for a call with the real Connor
+  -- It can use the calendly tool to create a UI widgent wherein the user can sign up for a call with the real Connor
 
 #### Retrieval
 

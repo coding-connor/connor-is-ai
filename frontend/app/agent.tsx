@@ -15,6 +15,11 @@ import {
 } from "@/components/chat/weather";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { AIMessage } from "@/ai/message";
+import {
+  Calendly,
+  CalendlyError,
+  CalendlyLoading,
+} from "@/components/chat/calendly";
 
 const API_URL = "http://localhost:8000/chat";
 
@@ -44,6 +49,11 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   "weather-data": {
     loading: (props?: any) => <CurrentWeatherLoading {...props} />,
     final: (props?: any) => <CurrentWeather {...props} />,
+  },
+  calendly: {
+    loading: (props?: any) => <CalendlyLoading {...props} />,
+    final: (props?: any) => <Calendly {...props} />,
+    error: (props?: any) => <CalendlyError {...props} />,
   },
 };
 
@@ -121,6 +131,7 @@ async function agent(inputs: {
         );
         return;
       }
+      console.log("Tool data:", toolData);
       toolState.selectedToolUI.done(
         toolState.selectedToolComponent.final(toolData)
       );

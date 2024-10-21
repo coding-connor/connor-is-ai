@@ -8,6 +8,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.graph.graph import CompiledGraph
 
+from gen_ui_backend.tools.calendly import calendly
 from gen_ui_backend.tools.github import github_repo
 from gen_ui_backend.tools.weather import weather_data
 
@@ -34,7 +35,7 @@ def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> Generative
         ]
     )
     model = ChatOpenAI(model="gpt-4o-mini", temperature=0, streaming=True)
-    tools = [github_repo, weather_data]
+    tools = [github_repo, weather_data, calendly]
     model_with_tools = model.bind_tools(tools)
     chain = initial_prompt | model_with_tools
     result = chain.invoke({"input": state["input"]}, config)
@@ -60,6 +61,7 @@ def invoke_tools(state: GenerativeUIState) -> GenerativeUIState:
     tools_map = {
         "github-repo": github_repo,
         "weather-data": weather_data,
+        "calendly": calendly,
     }
 
     if state["tool_calls"] is not None:
