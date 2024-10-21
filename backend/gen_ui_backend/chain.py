@@ -7,10 +7,26 @@ from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.graph.graph import CompiledGraph
+import os
 
 from gen_ui_backend.tools.calendly import calendly
 from gen_ui_backend.tools.github import github_repo
 from gen_ui_backend.tools.weather import weather_data
+from functools import lru_cache
+
+
+@lru_cache(maxsize=1)
+def read_markdown_files(directory):
+    content = ""
+    for root, _, files in os.walk(directory):
+        for file in sorted(files):
+            if file.endswith(".md"):
+                print('adding file', file)
+                with open(os.path.join(root, file), "r") as f:
+                    content += f.read() + "\n\n"
+    print(content)
+    return content
+
 
 
 class GenerativeUIState(TypedDict, total=False):
@@ -22,10 +38,12 @@ class GenerativeUIState(TypedDict, total=False):
     tool_result: Optional[dict]
     """The result of a tool call."""
 
+
 def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> GenerativeUIState:
     tools_parser = JsonOutputToolsParser()
-    with open("/Users/connor/connor-is-ai/backend/gen_ui_backend/system_prompt.md", "r") as file:
-        system_prompt = file.read()
+
+
+    system_prompt = read_markdown_files("gen_ui_backend/system_prompt")
 
     initial_prompt = ChatPromptTemplate.from_messages(
         [
