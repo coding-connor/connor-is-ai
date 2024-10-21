@@ -2,6 +2,7 @@ import Chat from "@/components/chat/chat";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 
 export default function Home() {
   return (
@@ -16,7 +17,8 @@ export default function Home() {
           priority={true}
         />
         <p className="text-[16px] text-center font-medium">
-          Hi, you are chatting with the AI Representative for Connor Haines!
+          Hi, you're chatting with AI Connor! I answer professional questions
+          about Connor Haines.
         </p>
         <div className="flex justify-center gap-2 mt-2">
           <a
@@ -32,6 +34,13 @@ export default function Home() {
             className="items-center"
           >
             <FontAwesomeIcon icon={faGithub} className="h-6" />
+          </a>
+          <a
+            href="https://calendly.com/connor-haines"
+            target="_blank"
+            className="items-center"
+          >
+            <FontAwesomeIcon icon={faCalendar} className="h-6" />
           </a>
         </div>
         <div className="flex justify-center w-full">
