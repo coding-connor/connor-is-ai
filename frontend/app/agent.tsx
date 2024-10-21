@@ -3,7 +3,12 @@ import { exposeEndpoints, streamRunnableUI } from "@/utils/server";
 import "server-only";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { EventHandlerFields } from "@/utils/server";
-import { Github, GithubLoading, GithubProps } from "@/components/chat/github";
+import {
+  Github,
+  GithubError,
+  GithubLoading,
+  GithubProps,
+} from "@/components/chat/github";
 import {
   CurrentWeatherLoading,
   CurrentWeather,
@@ -34,7 +39,7 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   "github-repo": {
     loading: (props?: any) => <GithubLoading {...props} />,
     final: (props?: any) => <Github {...props} />,
-    error: (props?: any) => <div>Error: {...props}</div>,
+    error: (props?: any) => <GithubError {...props} />,
   },
   "weather-data": {
     loading: (props?: any) => <CurrentWeatherLoading {...props} />,
@@ -112,7 +117,7 @@ async function agent(inputs: {
       const toolData = event.data.output.tool_result;
       if (toolData.error) {
         toolState.selectedToolUI.done(
-          toolState.selectedToolComponent.error(toolData.error)
+          toolState.selectedToolComponent.error(toolData)
         );
         return;
       }
