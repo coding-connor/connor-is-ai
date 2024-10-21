@@ -24,12 +24,14 @@ class GenerativeUIState(TypedDict, total=False):
 
 def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> GenerativeUIState:
     tools_parser = JsonOutputToolsParser()
+    with open("/Users/connor/connor-is-ai/backend/gen_ui_backend/system_prompt.md", "r") as file:
+        system_prompt = file.read()
+
     initial_prompt = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                "You are a helpful assistant. You're provided a list of tools, and an input from the user.\n"
-                + "Your job is to determine whether or not you have a tool which can handle the users input, or respond with plain text.",
+                system_prompt,
             ),
             MessagesPlaceholder("input"),
         ]
