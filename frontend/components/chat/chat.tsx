@@ -13,6 +13,7 @@ import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIMessage } from "@/ai/message";
 import { HumanMessageText } from "./message";
+import { Greeting } from "./greeting";
 
 export interface ChatProps {}
 
@@ -97,6 +98,7 @@ export default function Chat() {
   return (
     <div className="flex flex-col justify-center w-full">
       <div className="w-full h-[calc(100vh-395px)] overflow-y-scroll flex flex-col gap-4 mx-auto mb-2 border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
+        <Greeting></Greeting>
         <LocalContext.Provider value={onSubmit}>
           <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
         </LocalContext.Provider>
