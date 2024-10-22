@@ -3,6 +3,13 @@ import type { Metadata } from "next";
 
 import { EndpointsContext } from "./agent";
 import { ReactNode } from "react";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "LangChain Gen UI",
@@ -11,12 +18,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout(props: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <div className="flex flex-col p-0 md:p-12 h-[100vh]">
-          <EndpointsContext>{props.children}</EndpointsContext>
-        </div>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <div className="flex flex-col p-0 md:pt-6 h-[100vh]">
+            <EndpointsContext>{props.children}</EndpointsContext>
+          </div>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

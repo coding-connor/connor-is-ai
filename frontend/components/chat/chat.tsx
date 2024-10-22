@@ -95,25 +95,29 @@ export default function Chat() {
   }
 
   return (
-    <div className="w-full h-full min-h-[50vh] flex flex-col gap-4 mx-auto mb-2 border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
-      <LocalContext.Provider value={onSubmit}>
-        <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
-      </LocalContext.Provider>
-      <form
-        onSubmit={async (e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          await onSubmit(input);
-        }}
-        className="w-full flex flex-row gap-2"
-      >
-        <Input
-          placeholder="Ask Connor something..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
+    <div className="flex flex-col justify-center w-full">
+      <div className="w-full h-[calc(100vh-395px)] overflow-y-scroll flex flex-col gap-4 mx-auto mb-2 border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
+        <LocalContext.Provider value={onSubmit}>
+          <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
+        </LocalContext.Provider>
+      </div>
+      <div className="w-full flex flex-col gap-4 mx-auto mb-2 bg-gray-50/25">
+        <form
+          onSubmit={async (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            await onSubmit(input);
+          }}
+          className="w-full flex flex-row gap-2"
+        >
+          <Input
+            placeholder="Ask Connor something..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <Button type="submit">Submit</Button>
+        </form>
+      </div>
     </div>
   );
 }

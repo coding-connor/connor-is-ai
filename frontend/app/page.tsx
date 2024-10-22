@@ -3,10 +3,15 @@ import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
+import { SignOutButton } from "@clerk/nextjs";
 
 export default function Home() {
   return (
-    <main className="flex h-screen flex-col items-center justify-between px-4 sm:px-24">
+    <main className="relative flex h-screen flex-col items-center justify-between px-3 sm:px-24">
+      <div className="absolute top-4 right-4">
+        <SignOutButton> End Session</SignOutButton>
+      </div>
+
       <div className="w-full max-w-[900px] flex flex-col gap-2">
         <Image
           src="/avatars/me.png"
@@ -43,9 +48,7 @@ export default function Home() {
             <FontAwesomeIcon icon={faCalendar} className="h-6" />
           </a>
         </div>
-        <div className="flex justify-center w-full">
-          <Chat />
-        </div>
+        <Chat />
       </div>
     </main>
   );
