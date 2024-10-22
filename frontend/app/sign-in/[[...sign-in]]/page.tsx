@@ -229,7 +229,7 @@ export default function Page() {
         </div>
         <p className="text-[16px] text-center font-medium">
           I promise there's no lengthy sign-up, but I do need to make sure
-          you're real. To begin chatting with me, please enter you email to
+          you're real. To begin chatting with me, please enter your email to
           receive a one-time passcode.
         </p>
         <form onSubmit={handleSignUp} className="flex flex-col gap-4 mt-2">
