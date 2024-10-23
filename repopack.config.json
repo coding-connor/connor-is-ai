@@ -1,7 +1,7 @@
 {
   "output": {
-    "filePath": "backend/gen_ui_backend/system_prompt/3_Code/connor-is-ai.md",
-    "style": "markdown",
+    "filePath": "backend/gen_ui_backend/system_prompt/0_long_context_documents/connor-is-ai.txt",
+    "style": "plain",
     "removeComments": false,
     "removeEmptyLines": false,
     "topFilesLength": 5,

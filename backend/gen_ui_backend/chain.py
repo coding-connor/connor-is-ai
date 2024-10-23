@@ -18,12 +18,21 @@ from functools import lru_cache
 @lru_cache(maxsize=1)
 def read_markdown_files(directory):
     content = ""
+    files_to_read = []
     for root, _, files in os.walk(directory):
-        for file in sorted(files):
-            if file.endswith(".md"):
-                print("adding file", file)
-                with open(os.path.join(root, file), "r") as f:
-                    content += f.read() + "\n\n"
+        for file in files:
+            if file.endswith(".md") or file.endswith(".txt"):
+                files_to_read.append(os.path.join(root, file))
+
+    for file_path in sorted(files_to_read):
+        print("adding file", file_path)
+        with open(file_path, "r") as f:
+            file_content = f.read()
+            if file_path.endswith(".txt"):
+                # Escape curly braces
+                file_content = file_content.replace("{", "{{").replace("}", "}}")
+            content += file_content + "\n\n"
+
     print(content)
     return content
 

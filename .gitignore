@@ -38,3 +38,6 @@ jspm_packages/
 
 # VSCode settings
 .vscode/
+
+# .gitignore
+**/__pycache__/
