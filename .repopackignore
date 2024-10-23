@@ -1,0 +1,7 @@
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+gen_ui_backend/system_prompt/
+gen_ui_backend/system_prompt_archive/
+gen_ui_backend/system_prompt.example.md

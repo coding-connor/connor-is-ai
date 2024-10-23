@@ -13,7 +13,7 @@ load_dotenv()
 
 def start() -> None:
     app = FastAPI(
-        title="Gen UI Backend",
+        title="Connor AI Assistant Backend",
         version="1.0",
         description="A simple api server using Langchain's Runnable interfaces",
     )

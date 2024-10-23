@@ -1,0 +1,21 @@
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: repopack-run
+        name: Run repopack
+        entry: bash -c "cd \"$(git rev-parse --show-toplevel)\" && repopack"
+        language: system
+        always_run: true
+        stages: [pre-commit]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.3.7
+    hooks:
+      # Run the linter.
+      - id: ruff
+        types_or: [python, pyi, jupyter]
+        args: [--fix]
+      # Run the formatter.
+      - id: ruff-format
+        types_or: [python, pyi, jupyter]
