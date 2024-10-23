@@ -21,12 +21,11 @@ def read_markdown_files(directory):
     for root, _, files in os.walk(directory):
         for file in sorted(files):
             if file.endswith(".md"):
-                print('adding file', file)
+                print("adding file", file)
                 with open(os.path.join(root, file), "r") as f:
                     content += f.read() + "\n\n"
     print(content)
     return content
-
 
 
 class GenerativeUIState(TypedDict, total=False):
@@ -41,7 +40,6 @@ class GenerativeUIState(TypedDict, total=False):
 
 def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> GenerativeUIState:
     tools_parser = JsonOutputToolsParser()
-
 
     system_prompt = read_markdown_files("gen_ui_backend/system_prompt")
 
@@ -67,8 +65,9 @@ def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> Generative
         parsed_tools = tools_parser.invoke(result, config)
         return {"tool_calls": parsed_tools}
     else:
-        return {"result": str(result.content)}    
-    
+        return {"result": str(result.content)}
+
+
 def invoke_tools_or_return(state: GenerativeUIState) -> str:
     if "result" in state and isinstance(state["result"], str):
         return END
@@ -76,7 +75,8 @@ def invoke_tools_or_return(state: GenerativeUIState) -> str:
         return "invoke_tools"
     else:
         raise ValueError("Invalid state. No result or tool calls found.")
-    
+
+
 def invoke_tools(state: GenerativeUIState) -> GenerativeUIState:
     tools_map = {
         "github-repo": github_repo,
@@ -90,6 +90,7 @@ def invoke_tools(state: GenerativeUIState) -> GenerativeUIState:
         return {"tool_result": selected_tool.invoke(tool["args"])}
     else:
         raise ValueError("No tool calls found in state.")
+
 
 def create_graph() -> CompiledGraph:
     workflow = StateGraph(GenerativeUIState)

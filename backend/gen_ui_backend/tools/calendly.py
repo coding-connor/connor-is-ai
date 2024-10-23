@@ -6,6 +6,7 @@ from langchain_core.tools import tool
 
 CALENDLY_ACCOUNT = os.environ.get("CALENDLY_ACCOUNT")
 
+
 @tool("calendly", return_direct=True)
 def calendly() -> Union[Dict, str]:
     """Schedule a meeting or call or screening or interview using Calendly. Talk to the real Connor Haines."""

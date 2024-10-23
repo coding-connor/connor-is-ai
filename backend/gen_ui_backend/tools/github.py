@@ -5,9 +5,11 @@ import requests
 from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 
+
 class GithubRepoInput(BaseModel):
     owner: str = Field(..., description="The name of the repository owner.")
     repo: str = Field(..., description="The name of the repository.")
+
 
 @tool("github-repo", args_schema=GithubRepoInput, return_direct=True)
 def github_repo(owner: str, repo: str) -> Union[Dict, str]:
@@ -36,4 +38,6 @@ def github_repo(owner: str, repo: str) -> Union[Dict, str]:
         }
     except requests.exceptions.RequestException as err:
         print(err)
-        return {"error": "There was an error fetching the repository. Please check the owner and repo names."}
+        return {
+            "error": "There was an error fetching the repository. Please check the owner and repo names."
+        }
