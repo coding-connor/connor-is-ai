@@ -15,6 +15,7 @@ from gen_ui_backend.tools.weather import weather_data
 from functools import lru_cache
 
 
+# TODO Replace with LangChain Loader
 @lru_cache(maxsize=1)
 def read_markdown_files(directory):
     content = ""
