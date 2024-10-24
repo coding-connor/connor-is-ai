@@ -14,7 +14,7 @@ export function Greeting(): JSX.Element {
           by AI.
         </li>
         <li className="mb-2">
-          🤖 Try asking me about how I built this chatbot.
+          🤖 Try asking me about the source code for this chatbot.
         </li>
         <li className="mb-2">
           🤝 Be creative! Ask me questions as if you are conducting a screening
