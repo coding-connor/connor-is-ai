@@ -120,6 +120,9 @@ export default function Chat() {
           <Button type="submit">Submit</Button>
         </form>
       </div>
+      <div className="text-center text-xs mt-2">
+        This AI Representative can make mistakes. Check important info.{" "}
+      </div>
     </div>
   );
 }
