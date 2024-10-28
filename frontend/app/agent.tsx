@@ -20,6 +20,8 @@ import {
   CalendlyError,
   CalendlyLoading,
 } from "@/components/chat/calendly";
+import { cookies } from "next/headers";
+import { auth } from "@clerk/nextjs/server";
 
 const API_URL = "http://localhost:8000/chat";
 
@@ -88,8 +90,13 @@ async function agent(inputs: {
   chat_history: [role: string, content: string][];
 }) {
   "use server";
+  const { getToken } = await auth();
+  const template = "backend";
+  const token = await getToken({ template });
+
   const remoteRunnable = new RemoteRunnable({
     url: API_URL,
+    options: { headers: { cookie: `__session=${token};` } },
   });
 
   // Note: The selected tool component and UI are stored in the outer scope, this allows for mutation to maximize performance

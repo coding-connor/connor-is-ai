@@ -49,6 +49,7 @@ class GenerativeUIState(TypedDict, total=False):
 
 
 def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> GenerativeUIState:
+    # Access the user information from the config
     tools_parser = JsonOutputToolsParser()
 
     system_prompt = read_markdown_files("gen_ui_backend/system_prompt")
