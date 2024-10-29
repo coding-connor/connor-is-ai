@@ -1,3 +1,4 @@
+import uvicorn
 from gen_ui_backend.utils.auth import auth_dependency
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
@@ -36,3 +37,7 @@ graph = create_graph()
 runnable = graph.with_types(input_type=ChatInputType, output_type=dict)
 
 add_routes(app, runnable, path="/chat", playground_type="chat")
+
+
+def start():
+    uvicorn.run("gen_ui_backend.server:app", host="0.0.0.0", port=8000)

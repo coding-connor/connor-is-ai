@@ -5,3 +5,4 @@
 backend/gen_ui_backend/system_prompt/
 backend/gen_ui_backend/system_prompt_archive/
 backend/gen_ui_backend/system_prompt.example.md
+backend/alembic

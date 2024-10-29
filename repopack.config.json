@@ -3,7 +3,7 @@
     "filePath": "backend/gen_ui_backend/system_prompt/0_long_context_documents/connor-is-ai.txt",
     "style": "plain",
     "removeComments": false,
-    "removeEmptyLines": false,
+    "removeEmptyLines": true,
     "topFilesLength": 5,
     "showLineNumbers": false
   },

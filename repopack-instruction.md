@@ -1,6 +1,6 @@
 # Connor AI Representative Source Code
 
-The previous content comprises the entire source code that runs you, Connor Haines's AI Representative.
+The previous content the source code that runs you, Connor Haines's AI Representative.
 
 ## Use this code to:
 
