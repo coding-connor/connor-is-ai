@@ -1,4 +1,4 @@
-from gen_ui_backend.auth import auth_dependency
+from gen_ui_backend.utils.auth import auth_dependency
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
