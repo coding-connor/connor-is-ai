@@ -2,7 +2,7 @@ import uuid
 from gen_ui_backend.models.base import Base
 from sqlmodel import Field, Relationship
 from typing import TYPE_CHECKING, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 if TYPE_CHECKING:
     from gen_ui_backend.models.chat_message import ChatMessage
@@ -17,7 +17,7 @@ class ChatSession(Base, table=True):
         foreign_key="user.user_id", index=True
     )  # Foreign key to User
     started_at: datetime = Field(
-        default_factory=lambda: datetime.now(datetime.timezone.utc)
+        default_factory=lambda: datetime.now(timezone.utc)
     )
     ended_at: Optional[datetime] = None
 

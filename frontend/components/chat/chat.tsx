@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { EndpointsContext } from "@/app/agent";
@@ -14,15 +14,48 @@ import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIMessage } from "@/ai/message";
 import { HumanMessageText } from "./message";
 import { Greeting } from "./greeting";
+import { useAuth } from "@clerk/nextjs";
 
 export interface ChatProps {}
 
 export default function Chat() {
   const actions = useActions<typeof EndpointsContext>();
+  const { getToken } = useAuth();
 
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [history, setHistory] = useState<[role: string, content: string][]>([]);
   const [input, setInput] = useState("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSessionId = async () => {
+      try {
+        const token = await getToken({ template: "backend" });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat-session`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch session ID");
+        }
+
+        const data = await response.json();
+        setSessionId(data.session_id);
+        console.log("Session ID:", data.session_id);
+      } catch (error) {
+        console.error("Error fetching session ID:", error);
+      }
+    };
+
+    fetchSessionId();
+  }, [getToken]);
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
@@ -120,7 +153,7 @@ export default function Chat() {
           <Button type="submit">Submit</Button>
         </form>
       </div>
-      <div className="text-center text-xs mt-2">
+      <div className="text-center text-xs mt-2 text-gray-400">
         This AI Representative can make mistakes. Check important info.{" "}
       </div>
     </div>

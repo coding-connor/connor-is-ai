@@ -2,7 +2,7 @@ import uuid
 from gen_ui_backend.models.base import Base
 from sqlmodel import Field, Relationship
 from typing import TYPE_CHECKING, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 if TYPE_CHECKING:
     from gen_ui_backend.models.chat_session import ChatSession
@@ -21,7 +21,7 @@ class ChatMessage(Base, table=True):
     model: Optional[str]
     content: str
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(datetime.timezone.utc)
+        default_factory=lambda: datetime.now(timezone.utc)
     )
 
     # Relationship back to ChatSession

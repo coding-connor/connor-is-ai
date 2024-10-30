@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langserve import add_routes
+from gen_ui_backend.routes.chat_session.router import router as chat_session
 
 from gen_ui_backend.chain import create_graph
 from gen_ui_backend.types import ChatInputType
@@ -36,8 +37,11 @@ graph = create_graph()
 
 runnable = graph.with_types(input_type=ChatInputType, output_type=dict)
 
+# Langchain Runnable Routes 
 add_routes(app, runnable, path="/chat", playground_type="chat")
 
+# Non-Langchain Routes
+app.include_router(chat_session, prefix="/chat-session")
 
 def start():
     uvicorn.run("gen_ui_backend.server:app", host="0.0.0.0", port=8000)

@@ -9,13 +9,9 @@ PUBLIC_KEY_PATH = "jwt_public.pem"
 
 def is_signed_in(request: Request):
     sdk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
-    print("request", request)
-    print(request.cookies)
-    print(request.cookies.get("__session"))
     request_state = sdk.authenticate_request(
         request, AuthenticateRequestOptions(audience=["http://localhost:3000"])
     )
-    print(request_state)
     return request_state
 
 
@@ -34,13 +30,11 @@ def decode_token(token, public_key_path):
         # Handle expired token
         raise jwt.ExpiredSignatureError("The token has expired")
     except jwt.InvalidTokenError as e:
-        print(e)
         # Handle invalid token
         raise jwt.InvalidTokenError("The token is invalid")
 
 
 async def auth_dependency(request: Request):
-    print("here")
     request_state = is_signed_in(request)
     if not request_state.is_signed_in:
         raise HTTPException(status_code=401, detail="Unauthorized")
