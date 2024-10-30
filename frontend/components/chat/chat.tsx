@@ -25,7 +25,7 @@ export default function Chat() {
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [history, setHistory] = useState<[role: string, content: string][]>([]);
   const [input, setInput] = useState("");
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string>('');
 
   useEffect(() => {
     const fetchSessionId = async () => {
@@ -63,6 +63,7 @@ export default function Chat() {
     const element = await actions.agent({
       input,
       chat_history: history,
+      session_id: sessionId,
     });
 
     newElements.push(

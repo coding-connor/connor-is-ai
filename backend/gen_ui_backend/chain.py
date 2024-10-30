@@ -7,6 +7,12 @@ from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.graph.graph import CompiledGraph
+from langgraph.checkpoint.memory import MemorySaver
+from psycopg import Connection
+from langgraph.checkpoint.postgres import PostgresSaver
+
+
+
 import os
 
 from gen_ui_backend.tools.calendly import calendly
@@ -34,7 +40,7 @@ def read_markdown_files(directory):
                 file_content = file_content.replace("{", "{{").replace("}", "}}")
             content += file_content + "\n\n"
 
-    print(content)
+    # print(content)
     return content
 
 
@@ -47,9 +53,10 @@ class GenerativeUIState(TypedDict, total=False):
     tool_result: Optional[dict]
     """The result of a tool call."""
 
-
 def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> GenerativeUIState:
     # Access the user information from the config
+    print(state)
+
     tools_parser = JsonOutputToolsParser()
 
     system_prompt = read_markdown_files("gen_ui_backend/system_prompt")
@@ -63,7 +70,7 @@ def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> Generative
             MessagesPlaceholder("input"),
         ]
     )
-    model = ChatOpenAI(model="gpt-4o", temperature=0, streaming=True)
+    model = ChatOpenAI(model="gpt-4o-mini", temperature=0, streaming=True)
     tools = [github_repo, weather_data, calendly]
     model_with_tools = model.bind_tools(tools)
     chain = initial_prompt | model_with_tools
@@ -74,16 +81,19 @@ def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> Generative
 
     if isinstance(result.tool_calls, list) and len(result.tool_calls) > 0:
         parsed_tools = tools_parser.invoke(result, config)
-        return {"tool_calls": parsed_tools}
+        return {
+            "tool_calls": parsed_tools,
+            "result": str(result.content) if result.content else ""
+        }
     else:
         return {"result": str(result.content)}
 
 
 def invoke_tools_or_return(state: GenerativeUIState) -> str:
-    if "result" in state and isinstance(state["result"], str):
-        return END
-    elif "tool_calls" in state and isinstance(state["tool_calls"], list):
+    if "tool_calls" in state and isinstance(state["tool_calls"], list):
         return "invoke_tools"
+    elif "result" in state and isinstance(state["result"], str):
+        return END
     else:
         raise ValueError("Invalid state. No result or tool calls found.")
 
@@ -103,7 +113,7 @@ def invoke_tools(state: GenerativeUIState) -> GenerativeUIState:
         raise ValueError("No tool calls found in state.")
 
 
-def create_graph() -> CompiledGraph:
+def create_graph(conn) -> CompiledGraph:
     workflow = StateGraph(GenerativeUIState)
 
     workflow.add_node("invoke_model", invoke_model)  # type: ignore
@@ -112,5 +122,7 @@ def create_graph() -> CompiledGraph:
     workflow.set_entry_point("invoke_model")
     workflow.set_finish_point("invoke_tools")
 
-    graph = workflow.compile()
+    
+    checkpointer = PostgresSaver(conn)
+    graph = workflow.compile(checkpointer)
     return graph

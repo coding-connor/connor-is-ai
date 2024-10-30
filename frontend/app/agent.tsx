@@ -89,6 +89,7 @@ function isChatModelStreamEvent(event: StreamEvent): boolean {
 async function agent(inputs: {
   input: string;
   chat_history: [role: string, content: string][];
+  session_id: string;
 }) {
   "use server";
   const token = await getAuthToken();
@@ -178,6 +179,8 @@ async function agent(inputs: {
     }
   };
 
+  console.log("Inputs:", inputs);
+
   return streamRunnableUI(
     remoteRunnable,
     {
@@ -185,10 +188,12 @@ async function agent(inputs: {
         ...inputs.chat_history.map(([role, content]) => ({
           type: role,
           content,
+          session_id: inputs.session_id,
         })),
         {
           type: "human",
           content: inputs.input,
+          session_id: inputs.session_id,
         },
       ],
     },
