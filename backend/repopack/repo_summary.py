@@ -204,7 +204,7 @@ def save_analysis_to_file(analysis: AIMessage, file_path: str) -> None:
 
 def main() -> None:
     """
-    I'm hitting context window limits for my current spending tier with OpenAI, so I'm unable to include my entire codebase in the context for my chatbot. Instead, I'm generated thorough summaries to include.
+    I'm hitting context window limits for my current spending tier with OpenAI, so I'm unable to include my entire codebase in the context for my chatbot. Instead, I'm generating thorough summaries to include.
     """
     instructions = [(SUMMARY_INSTRUCTIONS, SUMMARY_OUTPUT_PATH), (SKELETON_INSTRUCTIONS, SKELETON_OUTPUT_PATH)]
 
