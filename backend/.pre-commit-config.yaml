@@ -7,6 +7,15 @@ repos:
         entry: bash -c "cd \"$(git rev-parse --show-toplevel)\" && repopack"
         language: system
         always_run: true
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: repo-summary
+        name: Repo Summary
+        entry: bash -c "cd \"$(git rev-parse --show-toplevel)/backend\" && poetry run python repopack/repo_summary.py"
+        language: system
+        always_run: true
+        # without pass_filenames, the hook will run with parrallel processes and run multiple times
+        pass_filenames: false
         stages: [pre-commit]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.

@@ -6,3 +6,13 @@ backend/gen_ui_backend/system_prompt/
 backend/gen_ui_backend/system_prompt_archive/
 backend/gen_ui_backend/system_prompt.example.md
 backend/alembic
+**/repopack.config.json
+**/.gitignore
+frontend/tsconfig.json
+frontend/tailwind.config.ts
+frontend/postcss.config.mjs
+frontend/components.json
+frontend/.gitignore
+frontend/.eslintrc.json
+frontend/app/globals.css
+frontend/components/ui/*

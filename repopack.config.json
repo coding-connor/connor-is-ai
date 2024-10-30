@@ -1,6 +1,6 @@
 {
   "output": {
-    "filePath": "backend/gen_ui_backend/system_prompt/0_long_context_documents/connor-is-ai.txt",
+    "filePath": "backend/repopack/connor_is_ai_full.txt",
     "style": "plain",
     "removeComments": false,
     "removeEmptyLines": true,

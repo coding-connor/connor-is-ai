@@ -27,6 +27,9 @@ sqlalchemy = "^2.0.36"
 [tool.poetry.scripts]
 start = "gen_ui_backend.server:start"
 
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.0.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
