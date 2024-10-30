@@ -3,6 +3,7 @@
 from sqlalchemy.orm import Session
 from gen_ui_backend.models import User, ChatSession
 
+
 def get_or_create_chat_session(db: Session, user_email: str) -> ChatSession:
     # Check if user exists
     user = db.query(User).filter(User.email == user_email).first()

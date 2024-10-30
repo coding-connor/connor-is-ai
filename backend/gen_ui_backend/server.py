@@ -1,7 +1,5 @@
 import os
-from psycopg_pool import ConnectionPool
-from psycopg import Connection  
-from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg import Connection
 import uvicorn
 from gen_ui_backend.utils.auth import auth_dependency
 from dotenv import load_dotenv
@@ -40,6 +38,8 @@ app.add_middleware(
 
 
 
+# Kind of annoying workaround. Langserve doesn't support Langgraph, as they want to you use Langraph Cloud. But that a lot of overhead to add another paid service, so this wrapper works for now. 
+# Specifically, in order to use a Langgraph checkpointer I need to get the thread_id from the request to pass it into the config for the graph. 
 @chain
 def graph_wrapper(inputs):
     connection_kwargs = {
@@ -47,17 +47,25 @@ def graph_wrapper(inputs):
         "prepare_threshold": 0,
     }
     db_url = os.environ.get("DB_DIRECT_URL")
+    # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required 
     with Connection.connect(db_url, **connection_kwargs) as conn:
         graph = create_graph(conn)
         runnable = graph.with_types(input_type=ChatInputType, output_type=dict)
-        config = {"configurable": {"thread_id": "1"}}
+        config = {"configurable": {"thread_id": "2"}}
         return runnable.invoke(inputs, config)
 
-# Langchain Runnable Routes 
-add_routes(app, graph_wrapper.with_types(input_type=ChatInputType, output_type=dict), path="/chat", playground_type="chat")
 
-# Non-Langchain Routes
+# Langserve Routes
+add_routes(
+    app,
+    graph_wrapper.with_types(input_type=ChatInputType, output_type=dict),
+    path="/chat",
+    playground_type="chat",
+)
+
+# Non-Language Routes
 app.include_router(chat_session, prefix="/chat-session")
+
 
 def start():
     uvicorn.run("gen_ui_backend.server:app", host="0.0.0.0", port=8000, reload=True)

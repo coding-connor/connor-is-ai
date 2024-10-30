@@ -5,12 +5,9 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
-from langgraph.graph import END, StateGraph
+from langgraph.graph import END, StateGraph, MessagesState
 from langgraph.graph.graph import CompiledGraph
-from langgraph.checkpoint.memory import MemorySaver
-from psycopg import Connection
 from langgraph.checkpoint.postgres import PostgresSaver
-
 
 
 import os
@@ -19,6 +16,8 @@ from gen_ui_backend.tools.calendly import calendly
 from gen_ui_backend.tools.github import github_repo
 from gen_ui_backend.tools.weather import weather_data
 from functools import lru_cache
+
+
 
 
 # TODO Replace with LangChain Loader
@@ -32,7 +31,6 @@ def read_markdown_files(directory):
                 files_to_read.append(os.path.join(root, file))
 
     for file_path in sorted(files_to_read):
-        print("adding file", file_path)
         with open(file_path, "r") as f:
             file_content = f.read()
             if file_path.endswith(".txt"):
@@ -53,9 +51,11 @@ class GenerativeUIState(TypedDict, total=False):
     tool_result: Optional[dict]
     """The result of a tool call."""
 
+
 def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> GenerativeUIState:
     # Access the user information from the config
     print(state)
+    print("\n\n\n")
 
     tools_parser = JsonOutputToolsParser()
 
@@ -83,7 +83,7 @@ def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> Generative
         parsed_tools = tools_parser.invoke(result, config)
         return {
             "tool_calls": parsed_tools,
-            "result": str(result.content) if result.content else ""
+            "result": str(result.content) if result.content else "",
         }
     else:
         return {"result": str(result.content)}
@@ -122,7 +122,6 @@ def create_graph(conn) -> CompiledGraph:
     workflow.set_entry_point("invoke_model")
     workflow.set_finish_point("invoke_tools")
 
-    
     checkpointer = PostgresSaver(conn)
     graph = workflow.compile(checkpointer)
     return graph

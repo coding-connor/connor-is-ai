@@ -16,9 +16,7 @@ class ChatSession(Base, table=True):
     user_id: uuid.UUID = Field(
         foreign_key="user.user_id", index=True
     )  # Foreign key to User
-    started_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     ended_at: Optional[datetime] = None
 
     # Relationship back to User and to ChatMessage

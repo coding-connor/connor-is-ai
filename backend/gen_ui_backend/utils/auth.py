@@ -29,7 +29,7 @@ def decode_token(token, public_key_path):
     except jwt.ExpiredSignatureError:
         # Handle expired token
         raise jwt.ExpiredSignatureError("The token has expired")
-    except jwt.InvalidTokenError as e:
+    except jwt.InvalidTokenError:
         # Handle invalid token
         raise jwt.InvalidTokenError("The token is invalid")
 

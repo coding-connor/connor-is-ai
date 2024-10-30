@@ -8,6 +8,7 @@ from gen_ui_backend.routes.chat_session.service import get_or_create_chat_sessio
 
 router = APIRouter()
 
+
 @router.get("/")
 async def chat_session_endpoint(
     db: Session = Depends(get_db_session),

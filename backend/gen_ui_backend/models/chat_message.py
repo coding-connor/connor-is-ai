@@ -20,9 +20,7 @@ class ChatMessage(Base, table=True):
     )  # Could be restricted to values "user" or "bot" with validation
     model: Optional[str]
     content: str
-    timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     # Relationship back to ChatSession
     session: "ChatSession" = Relationship(back_populates="messages")
