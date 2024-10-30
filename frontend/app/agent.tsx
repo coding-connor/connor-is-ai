@@ -86,11 +86,7 @@ function isChatModelStreamEvent(event: StreamEvent): boolean {
   );
 }
 
-async function agent(inputs: {
-  input: string;
-  chat_history: [role: string, content: string][];
-  session_id: string;
-}) {
+async function agent(inputs: { input: string; thread_id: string }) {
   "use server";
   const token = await getAuthToken();
 
@@ -184,18 +180,13 @@ async function agent(inputs: {
   return streamRunnableUI(
     remoteRunnable,
     {
-      input: [
-        ...inputs.chat_history.map(([role, content]) => ({
-          type: role,
-          content,
-          session_id: inputs.session_id,
-        })),
+      messages: [
         {
           type: "human",
           content: inputs.input,
-          session_id: inputs.session_id,
         },
       ],
+      thread_id: inputs.thread_id,
     },
     {
       dispatchEventHandlers,

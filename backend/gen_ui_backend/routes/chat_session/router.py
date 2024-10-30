@@ -20,3 +20,16 @@ async def chat_session_endpoint(
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@router.post("/end")
+async def end_session_endpoint(
+    session_id: str,
+    db: Session = Depends(get_db_session),
+    user_email: str = Depends(auth_dependency),
+):
+    try:
+        end_chat_session(db, session_id)
+        return {"detail": "Session ended successfully"}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Failed to end session")

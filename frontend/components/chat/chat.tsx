@@ -25,10 +25,11 @@ export default function Chat() {
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [history, setHistory] = useState<[role: string, content: string][]>([]);
   const [input, setInput] = useState("");
-  const [sessionId, setSessionId] = useState<string>('');
+  const [threadId, setThreadId] = useState<string>("");
 
   useEffect(() => {
-    const fetchSessionId = async () => {
+    // Function to fetch or create a chat session
+    const fetchThreadId = async () => {
       try {
         const token = await getToken({ template: "backend" });
         const response = await fetch(
@@ -43,27 +44,69 @@ export default function Chat() {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch session ID");
+          throw new Error("Failed to fetch thread ID");
         }
 
         const data = await response.json();
-        setSessionId(data.session_id);
-        console.log("Session ID:", data.session_id);
+        setThreadId(data.session_id);
+        console.log("Thread ID:", data.session_id);
       } catch (error) {
-        console.error("Error fetching session ID:", error);
+        console.error("Error fetching Thread ID:", error);
       }
     };
 
-    fetchSessionId();
-  }, [getToken]);
+    // Function to end the chat session
+    const endSession = async () => {
+      try {
+        const token = await getToken({ template: "backend" });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/end-session`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ session_id: threadId }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to end session");
+        }
+
+        console.log("Session ended successfully");
+      } catch (error) {
+        console.error("Error ending session:", error);
+      }
+    };
+
+    fetchThreadId();
+
+    // Handle component unmount and page unload
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (threadId) {
+        navigator.sendBeacon(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/end-session`,
+          JSON.stringify({ session_id: threadId })
+        );
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      endSession();
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [getToken, threadId]);
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
 
     const element = await actions.agent({
       input,
-      chat_history: history,
-      session_id: sessionId,
+      thread_id: threadId,
     });
 
     newElements.push(

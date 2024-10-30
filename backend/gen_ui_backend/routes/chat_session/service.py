@@ -1,5 +1,6 @@
 # services/chat_service.py
 
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from gen_ui_backend.models import User, ChatSession
 
@@ -26,3 +27,9 @@ def get_or_create_chat_session(db: Session, user_email: str) -> ChatSession:
         db.commit()
         db.refresh(chat_session)
     return chat_session
+
+def end_chat_session(db: Session, session_id: str) -> None:
+    chat_session = db.query(ChatSession).filter(ChatSession.session_id == session_id).first()
+    if chat_session and not chat_session.ended_at:
+        chat_session.ended_at = datetime.now(timezone.utc)
+        db.commit()

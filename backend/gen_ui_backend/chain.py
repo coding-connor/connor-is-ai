@@ -42,17 +42,17 @@ def read_markdown_files(directory):
     return content
 
 
-class GenerativeUIState(TypedDict, total=False):
-    input: HumanMessage
-    result: Optional[str]
-    """Plain text response if no tool was used."""
-    tool_calls: Optional[List[dict]]
-    """A list of parsed tool calls."""
-    tool_result: Optional[dict]
-    """The result of a tool call."""
+# class MessagesState(TypedDict, total=False):
+#     input: HumanMessage
+#     result: Optional[str]
+#     """Plain text response if no tool was used."""
+#     tool_calls: Optional[List[dict]]
+#     """A list of parsed tool calls."""
+#     tool_result: Optional[dict]
+#     """The result of a tool call."""
 
 
-def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> GenerativeUIState:
+def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
     # Access the user information from the config
     print(state)
     print("\n\n\n")
@@ -74,47 +74,47 @@ def invoke_model(state: GenerativeUIState, config: RunnableConfig) -> Generative
     tools = [github_repo, weather_data, calendly]
     model_with_tools = model.bind_tools(tools)
     chain = initial_prompt | model_with_tools
-    result = chain.invoke({"input": state["input"]}, config)
+    result = chain.invoke({"input": state["messages"]}, config)
 
     if not isinstance(result, AIMessage):
         raise ValueError("Invalid result from model. Expected AIMessage.")
 
     if isinstance(result.tool_calls, list) and len(result.tool_calls) > 0:
-        parsed_tools = tools_parser.invoke(result, config)
-        return {
-            "tool_calls": parsed_tools,
-            "result": str(result.content) if result.content else "",
-        }
+        result.tool_calls = tools_parser.invoke(result, config)
+        return {"messages": result}
     else:
-        return {"result": str(result.content)}
+        return {"messages": result}
 
 
-def invoke_tools_or_return(state: GenerativeUIState) -> str:
-    if "tool_calls" in state and isinstance(state["tool_calls"], list):
+def invoke_tools_or_return(state: MessagesState) -> str:
+    last_message = state["messages"][-1]
+    if hasattr(last_message, "tool_calls") and isinstance(last_message.tool_calls, list) and len(last_message.tool_calls) > 0:
         return "invoke_tools"
-    elif "result" in state and isinstance(state["result"], str):
+    elif hasattr(last_message, "content") and isinstance(last_message.content, str):
         return END
     else:
-        raise ValueError("Invalid state. No result or tool calls found.")
+        raise ValueError("Invalid state. No message content or tool calls found.")
 
 
-def invoke_tools(state: GenerativeUIState) -> GenerativeUIState:
+def invoke_tools(state: MessagesState) -> MessagesState:
     tools_map = {
         "github-repo": github_repo,
         "weather-data": weather_data,
         "calendly": calendly,
     }
 
-    if state["tool_calls"] is not None:
-        tool = state["tool_calls"][0]
+    last_message = state["messages"][-1]
+
+    if last_message.tool_calls is not None:
+        tool = last_message.tool_calls[0]
         selected_tool = tools_map[tool["type"]]
-        return {"tool_result": selected_tool.invoke(tool["args"])}
+        return {"messages": selected_tool.invoke(tool["args"])}
     else:
         raise ValueError("No tool calls found in state.")
 
 
 def create_graph(conn) -> CompiledGraph:
-    workflow = StateGraph(GenerativeUIState)
+    workflow = StateGraph(MessagesState)
 
     workflow.add_node("invoke_model", invoke_model)  # type: ignore
     workflow.add_node("invoke_tools", invoke_tools)

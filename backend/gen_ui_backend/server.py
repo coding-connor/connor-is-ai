@@ -10,7 +10,7 @@ from gen_ui_backend.routes.chat_session.router import router as chat_session
 
 from langchain_core.runnables import chain
 from gen_ui_backend.chain import create_graph
-from gen_ui_backend.types import ChatInputType
+from gen_ui_backend.types import ChatInput, ChatMessage
 
 # Load environment variables from .env file
 load_dotenv()
@@ -50,15 +50,15 @@ def graph_wrapper(inputs):
     # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required 
     with Connection.connect(db_url, **connection_kwargs) as conn:
         graph = create_graph(conn)
-        runnable = graph.with_types(input_type=ChatInputType, output_type=dict)
-        config = {"configurable": {"thread_id": "2"}}
+        runnable = graph.with_types(input_type=ChatMessage, output_type=dict)
+        config = {"configurable": {"thread_id": inputs["thread_id"]}}
         return runnable.invoke(inputs, config)
 
 
 # Langserve Routes
 add_routes(
     app,
-    graph_wrapper.with_types(input_type=ChatInputType, output_type=dict),
+    graph_wrapper.with_types(input_type=ChatInput, output_type=dict),
     path="/chat",
     playground_type="chat",
 )
