@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { EndpointsContext } from "@/app/agent";
@@ -15,6 +15,8 @@ import { AIMessage } from "@/ai/message";
 import { HumanMessageText } from "./message";
 import { Greeting } from "./greeting";
 import { useAuth } from "@clerk/nextjs";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 
 export interface ChatProps {}
 
@@ -28,7 +30,6 @@ export default function Chat() {
   const [threadId, setThreadId] = useState<string>("");
 
   useEffect(() => {
-    // Function to fetch or create a chat session
     const fetchThreadId = async () => {
       try {
         const token = await getToken({ template: "backend" });
@@ -55,51 +56,37 @@ export default function Chat() {
       }
     };
 
-    // Function to end the chat session
-    const endSession = async () => {
-      try {
-        const token = await getToken({ template: "backend" });
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/end-session`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ session_id: threadId }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to end session");
-        }
-
-        console.log("Session ended successfully");
-      } catch (error) {
-        console.error("Error ending session:", error);
-      }
-    };
-
     fetchThreadId();
+  }, [getToken]);
 
-    // Handle component unmount and page unload
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (threadId) {
-        navigator.sendBeacon(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/end-session`,
-          JSON.stringify({ session_id: threadId })
-        );
+  const newSession = async () => {
+    try {
+      const token = await getToken({ template: "backend" });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat-session/new`,
+        {
+          method: "POST",
+          body: JSON.stringify({ session_id: threadId }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to end session");
       }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      endSession();
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [getToken, threadId]);
+      console.log("Session ended successfully");
+      const data = await response.json();
+      setThreadId(data.session_id);
+      setHistory([]);
+      setElements([]);
+      setInput("");
+      console.log("Thread ID:", data.session_id);
+    } catch (error) {
+      console.error("Error ending session:", error);
+    }
+  };
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
@@ -175,6 +162,14 @@ export default function Chat() {
   return (
     <div className="flex flex-col justify-center w-full">
       <div className="w-full h-[calc(100vh-395px)] overflow-y-scroll flex flex-col gap-4 mx-auto mb-2 border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
+        <Button
+          onClick={newSession}
+          className="absolute top-4 right-4 flex items-center px-3 py-1"
+          variant={"default"}
+        >
+          <FontAwesomeIcon icon={faPlusCircle} className="h-4 w-4 mr-1" />
+          New Chat
+        </Button>
         <Greeting></Greeting>
         <LocalContext.Provider value={onSubmit}>
           <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
@@ -198,7 +193,7 @@ export default function Chat() {
         </form>
       </div>
       <div className="text-center text-xs mt-2 text-gray-400">
-        This AI Representative can make mistakes. Check important info.{" "}
+        AI makes mistakes. Check important info.{" "}
       </div>
     </div>
   );

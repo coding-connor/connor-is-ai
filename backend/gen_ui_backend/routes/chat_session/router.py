@@ -2,9 +2,10 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from gen_ui_backend.utils.auth import auth_dependency
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from gen_ui_backend.utils.database import get_session as get_db_session
-from gen_ui_backend.routes.chat_session.service import get_or_create_chat_session
+from gen_ui_backend.routes.chat_session.service import get_or_create_chat_session, new_session
 
 router = APIRouter()
 
@@ -21,15 +22,18 @@ async def chat_session_endpoint(
         print(e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@router.post("/end")
-async def end_session_endpoint(
-    session_id: str,
+class NewSessionRequest(BaseModel):
+    session_id: str
+
+@router.post("/new")
+async def new_session_endpoint(
+    body: NewSessionRequest,
     db: Session = Depends(get_db_session),
     user_email: str = Depends(auth_dependency),
 ):
     try:
-        end_chat_session(db, session_id)
-        return {"detail": "Session ended successfully"}
+        session = new_session(db, user_email, body.session_id)
+        return {"session_id": str(session.session_id)}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Failed to end session")

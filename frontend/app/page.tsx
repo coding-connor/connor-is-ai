@@ -4,13 +4,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { SignOutButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
     <main className="relative flex h-screen flex-col items-center justify-between px-3 sm:px-24">
-      <div className="absolute top-4 right-4">
-        <SignOutButton> End Session</SignOutButton>
-      </div>
+      <Button
+        variant="outline"
+        className="absolute top-4 left-4 flex items-center px-3 py-1"
+      >
+        <SignOutButton> Logout </SignOutButton>
+      </Button>
 
       <div className="w-full max-w-[900px] flex flex-col gap-2">
         <Image
