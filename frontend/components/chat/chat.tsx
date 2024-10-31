@@ -25,7 +25,6 @@ export default function Chat() {
   const { getToken } = useAuth();
 
   const [elements, setElements] = useState<JSX.Element[]>([]);
-  const [history, setHistory] = useState<[role: string, content: string][]>([]);
   const [input, setInput] = useState("");
   const [threadId, setThreadId] = useState<string>("");
 
@@ -79,7 +78,6 @@ export default function Chat() {
       console.log("Session ended successfully");
       const data = await response.json();
       setThreadId(data.session_id);
-      setHistory([]);
       setElements([]);
       setInput("");
       console.log("Thread ID:", data.session_id);
@@ -104,33 +102,6 @@ export default function Chat() {
         </div>
       </div>
     );
-
-    // consume the value stream to obtain the final string value
-    // after which we can append to our chat history state
-    (async () => {
-      console.log("in here 1");
-      let lastEvent = await element.lastEvent;
-      console.log(element);
-      console.log(lastEvent);
-      // if (lastEvent.invoke_model && lastEvent.invoke_model.result) {
-      //   console.log("in here 6");
-      //   setHistory((prev) => [
-      //     ...prev,
-      //     ["human", input],
-      //     ["ai", lastEvent.invoke_model.result],
-      //   ]);
-      // } else if (lastEvent.input && lastEvent.result) {
-      //   console.log("in here 7");
-      //   // Currently in testing this is the only part of the code I'm reaching. It could be different with tool calls, so I'll leave the above for now.
-      //   setHistory((prev) => [
-      //     ...prev,
-      //     ["human", input],
-      //     ["ai", lastEvent.result],
-      //   ]);
-      // }
-    })();
-
-    console.log(history);
 
     setElements(newElements);
     setInput("");

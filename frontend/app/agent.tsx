@@ -60,21 +60,16 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   },
 };
 
-function isInvokeModelEvent(type: string, event: StreamEvent): boolean {
-  return (
-    type === "end" &&
-    event.data.output &&
-    typeof event.data.output === "object" &&
-    event.name === "invoke_model"
-  );
+function isToolStartEvent(event: StreamEvent): boolean {
+  return event.event === "on_tool_start" && event.name in TOOL_COMPONENT_MAP;
 }
 
-function isInvokeToolsEvent(type: string, event: StreamEvent): boolean {
+function isInvokeToolsEvent(event: StreamEvent): boolean {
   return (
-    type === "end" &&
+    event.event === "on_chain_end" &&
+    event.name === "invoke_tools" &&
     event.data.output &&
-    typeof event.data.output === "object" &&
-    event.name === "invoke_tools"
+    typeof event.data.output === "object"
   );
 }
 
@@ -101,23 +96,18 @@ async function agent(inputs: { input: string; thread_id: string }) {
     selectedToolUI: null,
   };
 
-  const handleInvokeModelEvent: EventHandler = (
+  const handToolStartEvent: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields,
     toolState: ToolState
   ) => {
-    if (
-      "tool_calls" in event.data.output &&
-      event.data.output.tool_calls.length > 0
-    ) {
-      const toolCall = event.data.output.tool_calls[0];
-      if (!toolState.selectedToolComponent && !toolState.selectedToolUI) {
-        toolState.selectedToolComponent = TOOL_COMPONENT_MAP[toolCall.type];
-        toolState.selectedToolUI = createStreamableUI(
-          toolState.selectedToolComponent.loading()
-        );
-        fields.ui.append(toolState.selectedToolUI?.value);
-      }
+    const toolCall = event.name;
+    if (!toolState.selectedToolComponent && !toolState.selectedToolUI) {
+      toolState.selectedToolComponent = TOOL_COMPONENT_MAP[toolCall];
+      toolState.selectedToolUI = createStreamableUI(
+        toolState.selectedToolComponent.loading()
+      );
+      fields.ui.append(toolState.selectedToolUI?.value);
     }
   };
 
@@ -127,7 +117,9 @@ async function agent(inputs: { input: string; thread_id: string }) {
     toolState: ToolState
   ) => {
     if (toolState.selectedToolUI && toolState.selectedToolComponent) {
-      const toolData = event.data.output.tool_result;
+      const toolData =
+        event.data.output.messages[event.data.output.messages.length - 1]
+          .content;
       if (toolData.error) {
         toolState.selectedToolUI.done(
           toolState.selectedToolComponent.error(toolData)
@@ -160,13 +152,11 @@ async function agent(inputs: { input: string; thread_id: string }) {
     event: StreamEvent,
     fields: EventHandlerFields
   ) => {
-    const [type] = event.event.split("_").slice(2);
-
-    if (isInvokeModelEvent(type, event)) {
+    if (isToolStartEvent(event)) {
       console.log("Invoke model event:", event);
-      handleInvokeModelEvent(event, fields, toolState);
+      handToolStartEvent(event, fields, toolState);
     }
-    if (isInvokeToolsEvent(type, event)) {
+    if (isInvokeToolsEvent(event)) {
       console.log("Invoke tools event:", event);
       handleInvokeToolsEvent(event, fields, toolState);
     }

@@ -1,3 +1,4 @@
+import json
 import os
 from psycopg import Connection
 import uvicorn
@@ -9,6 +10,8 @@ from langserve import add_routes
 from gen_ui_backend.routes.chat_session.router import router as chat_session
 
 from langchain_core.runnables import chain
+from langchain.callbacks.base import BaseCallbackHandler
+
 from gen_ui_backend.chain import create_graph
 from gen_ui_backend.types import ChatInput, ChatMessage
 
@@ -37,9 +40,30 @@ app.add_middleware(
 )
 
 
+class VerboseDebugCallback(BaseCallbackHandler):
+    """Catches and logs all callback events."""
 
-# Kind of annoying workaround. Langserve doesn't support Langgraph, as they want to you use Langraph Cloud. But that a lot of overhead to add another paid service, so this wrapper works for now. 
-# Specifically, in order to use a Langgraph checkpointer I need to get the thread_id from the request to pass it into the config for the graph. 
+    def __getattribute__(self, name: str):
+        attr = super().__getattribute__(name)
+
+        if name.startswith("on_") and callable(attr):
+
+            def wrapper(*args, **kwargs):
+                print(f"\n{'='*20} {name} {'='*20}")
+                if args:
+                    print(f"Args: {args}")
+                if kwargs:
+                    print(f"Kwargs: {kwargs}")
+                print("=" * 50 + "\n")
+                return attr(*args, **kwargs)
+
+            return wrapper
+
+        return attr
+
+
+# Kind of annoying workaround. Langserve doesn't support Langgraph, as they want to you use Langraph Cloud. But that a lot of overhead to add another paid service, so this wrapper works for now.
+# Specifically, in order to use a Langgraph checkpointer I need to get the thread_id from the request to pass it into the config for the graph.
 @chain
 def graph_wrapper(inputs):
     connection_kwargs = {
@@ -47,18 +71,22 @@ def graph_wrapper(inputs):
         "prepare_threshold": 0,
     }
     db_url = os.environ.get("DB_DIRECT_URL")
-    # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required 
+    # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required
     with Connection.connect(db_url, **connection_kwargs) as conn:
         graph = create_graph(conn)
-        runnable = graph.with_types(input_type=ChatMessage, output_type=dict)
-        config = {"configurable": {"thread_id": inputs["thread_id"]}}
+        runnable = graph.with_types(input_type=ChatMessage)
+        # Create an instance of the handler
+        config = {
+            "configurable": {"thread_id": inputs["thread_id"]},
+        }
+
         return runnable.invoke(inputs, config)
 
 
 # Langserve Routes
 add_routes(
     app,
-    graph_wrapper.with_types(input_type=ChatInput, output_type=dict),
+    graph_wrapper.with_types(input_type=ChatInput),
     path="/chat",
     playground_type="chat",
 )

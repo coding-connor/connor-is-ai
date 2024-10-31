@@ -1,7 +1,7 @@
 from typing import List, Optional, TypedDict
 
 from langchain.output_parsers.openai_tools import JsonOutputToolsParser
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
@@ -18,6 +18,10 @@ from gen_ui_backend.tools.weather import weather_data
 from functools import lru_cache
 
 
+# This is critical for frontend deserialization
+def ensure_array(result):
+    """Wrap non-array results in an array."""
+    return [result] if not isinstance(result, list) else result
 
 
 # TODO Replace with LangChain Loader
@@ -54,10 +58,6 @@ def read_markdown_files(directory):
 
 def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
     # Access the user information from the config
-    print(state)
-    print("\n\n\n")
-
-    tools_parser = JsonOutputToolsParser()
 
     system_prompt = read_markdown_files("gen_ui_backend/system_prompt")
 
@@ -80,15 +80,18 @@ def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
         raise ValueError("Invalid result from model. Expected AIMessage.")
 
     if isinstance(result.tool_calls, list) and len(result.tool_calls) > 0:
-        result.tool_calls = tools_parser.invoke(result, config)
-        return {"messages": result}
+        return {"messages": ensure_array(result)}
     else:
-        return {"messages": result}
+        return {"messages": ensure_array(result)}
 
 
 def invoke_tools_or_return(state: MessagesState) -> str:
     last_message = state["messages"][-1]
-    if hasattr(last_message, "tool_calls") and isinstance(last_message.tool_calls, list) and len(last_message.tool_calls) > 0:
+    if (
+        hasattr(last_message, "tool_calls")
+        and isinstance(last_message.tool_calls, list)
+        and len(last_message.tool_calls) > 0
+    ):
         return "invoke_tools"
     elif hasattr(last_message, "content") and isinstance(last_message.content, str):
         return END
@@ -107,8 +110,11 @@ def invoke_tools(state: MessagesState) -> MessagesState:
 
     if last_message.tool_calls is not None:
         tool = last_message.tool_calls[0]
-        selected_tool = tools_map[tool["type"]]
-        return {"messages": selected_tool.invoke(tool["args"])}
+        selected_tool = tools_map[tool["name"]]
+        tool_result = selected_tool.invoke(tool["args"])
+        tool_result["type"] = "text"
+        tool_result = ToolMessage(content=[tool_result], tool_call_id=tool["id"])
+        return {"messages": ensure_array(tool_result)}
     else:
         raise ValueError("No tool calls found in state.")
 
