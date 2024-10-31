@@ -5,6 +5,7 @@ import { Runnable } from "@langchain/core/runnables";
 import { CompiledStateGraph } from "@langchain/langgraph";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
+import { json } from "stream/consumers";
 
 export const LAMBDA_STREAM_WRAPPER_NAME = "lambda_stream_wrapper";
 
@@ -41,8 +42,6 @@ export function streamRunnableUI<RunInput, RunOutput>(
   const [lastEvent, resolve, reject] = withResolvers<
     Array<any> | Record<string, any>
   >();
-  let shouldRecordLastEvent = true;
-
   (async () => {
     let lastEventValue: StreamEvent | null = null;
     const callbacks: RunUICallbacks = {};
@@ -50,28 +49,37 @@ export function streamRunnableUI<RunInput, RunOutput>(
     try {
       for await (const streamEvent of (
         runnable as Runnable<RunInput, RunOutput>
-      ).streamEvents(inputs, {
-        version: "v1",
-      })) {
+      ).streamEvents(
+        inputs,
+        { version: "v1" },
+        {
+          // May as well exclude unneeded events from streaming.
+          // Note: The EventHandlers determine which events we care about.
+          excludeNames: [
+            "ChannelWrite<invoke_model,input,result,tool_calls,tool_result>",
+            "ChannelWrite<invoke_tools,input,result,tool_calls,tool_result>",
+            "ChannelWrite<invoke_tools,input,result,tool_calls,tool_result>",
+            "invoke_tools_or_return",
+            "RunnableSequence",
+            "LangGraph",
+            "/chat",
+            "__start__",
+            "ChatPromptTemplate",
+            "JsonOutputToolsParser",
+          ],
+        }
+      )) {
         console.log("Stream event:", streamEvent);
 
         const fields: EventHandlerFields = { ui, callbacks };
         await options.dispatchEventHandlers(streamEvent, fields);
-        if (shouldRecordLastEvent) {
-          lastEventValue = streamEvent;
-        }
-        // I'm not sure what this is doing. It would need to get another event that it skips recording to be useful. Also, I'm not sure what would make the name LangGraph. Currently I get /chat in testing, but again maybe it's relevant for tooling.
-        if (
-          streamEvent.data.chunk?.name === "LangGraph" &&
-          streamEvent.data.chunk?.event === "on_chain_end"
-        ) {
-          shouldRecordLastEvent = false;
-        }
+        lastEventValue = streamEvent;
       }
 
       console.log("Last event value:", lastEventValue);
-      const resolveValue =
+      let lastEventOutput =
         lastEventValue?.data.output || lastEventValue?.data.chunk?.data?.output;
+      const resolveValue = JSON.parse(JSON.stringify(lastEventOutput));
       // Sets the value of lastEvent
       resolve(resolveValue);
     } catch (error) {

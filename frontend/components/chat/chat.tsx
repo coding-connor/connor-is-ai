@@ -112,45 +112,22 @@ export default function Chat() {
       let lastEvent = await element.lastEvent;
       console.log(element);
       console.log(lastEvent);
-      if (Array.isArray(lastEvent)) {
-        console.log("in here 2");
-        if (lastEvent[0].invoke_model && lastEvent[0].invoke_model.result) {
-          console.log("in here 3");
-          setHistory((prev) => [
-            ...prev,
-            ["human", input],
-            ["ai", lastEvent[0].invoke_model.result],
-          ]);
-        } else if (lastEvent[1].invoke_tools) {
-          console.log("in here 4");
-          setHistory((prev) => [
-            ...prev,
-            ["human", input],
-            [
-              "ai",
-              `Tool result: ${JSON.stringify(lastEvent[1].invoke_tools.tool_result, null)}`,
-            ],
-          ]);
-        } else {
-          console.log("in here 5");
-          setHistory((prev) => [...prev, ["human", input]]);
-        }
-      } else if (lastEvent.invoke_model && lastEvent.invoke_model.result) {
-        console.log("in here 6");
-        setHistory((prev) => [
-          ...prev,
-          ["human", input],
-          ["ai", lastEvent.invoke_model.result],
-        ]);
-      } else if (lastEvent.input && lastEvent.result) {
-        console.log("in here 7");
-        // Currently in testing this is the only part of the code I'm reaching. It could be different with tool calls, so I'll leave the above for now.
-        setHistory((prev) => [
-          ...prev,
-          ["human", input],
-          ["ai", lastEvent.result],
-        ]);
-      }
+      // if (lastEvent.invoke_model && lastEvent.invoke_model.result) {
+      //   console.log("in here 6");
+      //   setHistory((prev) => [
+      //     ...prev,
+      //     ["human", input],
+      //     ["ai", lastEvent.invoke_model.result],
+      //   ]);
+      // } else if (lastEvent.input && lastEvent.result) {
+      //   console.log("in here 7");
+      //   // Currently in testing this is the only part of the code I'm reaching. It could be different with tool calls, so I'll leave the above for now.
+      //   setHistory((prev) => [
+      //     ...prev,
+      //     ["human", input],
+      //     ["ai", lastEvent.result],
+      //   ]);
+      // }
     })();
 
     console.log(history);
