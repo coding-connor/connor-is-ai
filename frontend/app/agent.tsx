@@ -64,13 +64,8 @@ function isToolStartEvent(event: StreamEvent): boolean {
   return event.event === "on_tool_start" && event.name in TOOL_COMPONENT_MAP;
 }
 
-function isInvokeToolsEvent(event: StreamEvent): boolean {
-  return (
-    event.event === "on_chain_end" &&
-    event.name === "invoke_tools" &&
-    event.data.output &&
-    typeof event.data.output === "object"
-  );
+function IsToolsEndEvent(event: StreamEvent): boolean {
+  return event.event === "on_tool_end" && event.name in TOOL_COMPONENT_MAP;
 }
 
 function isChatModelStreamEvent(event: StreamEvent): boolean {
@@ -96,7 +91,7 @@ async function agent(inputs: { input: string; thread_id: string }) {
     selectedToolUI: null,
   };
 
-  const handToolStartEvent: EventHandler = (
+  const handleToolStartEventt: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields,
     toolState: ToolState
@@ -111,26 +106,25 @@ async function agent(inputs: { input: string; thread_id: string }) {
     }
   };
 
-  const handleInvokeToolsEvent: EventHandler = (
+  const handleToolsEndEvent: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields,
     toolState: ToolState
   ) => {
-    if (toolState.selectedToolUI && toolState.selectedToolComponent) {
-      const toolData =
-        event.data.output.messages[event.data.output.messages.length - 1]
-          .content;
-      if (toolData.error) {
-        toolState.selectedToolUI.done(
-          toolState.selectedToolComponent.error(toolData)
-        );
-        return;
-      }
-      console.log("Tool data:", toolData);
+    if (!toolState.selectedToolUI || !toolState.selectedToolComponent) return;
+
+    const toolData = event.data.output;
+
+    if (toolData.error) {
       toolState.selectedToolUI.done(
-        toolState.selectedToolComponent.final(toolData)
+        toolState.selectedToolComponent.error(toolData)
       );
+      return;
     }
+    console.log("Tool data:", toolData);
+    toolState.selectedToolUI.done(
+      toolState.selectedToolComponent.final(toolData)
+    );
   };
 
   const handleChatModelStreamEvent: EventHandler = (
@@ -153,12 +147,10 @@ async function agent(inputs: { input: string; thread_id: string }) {
     fields: EventHandlerFields
   ) => {
     if (isToolStartEvent(event)) {
-      console.log("Invoke model event:", event);
-      handToolStartEvent(event, fields, toolState);
+      handleToolStartEventt(event, fields, toolState);
     }
-    if (isInvokeToolsEvent(event)) {
-      console.log("Invoke tools event:", event);
-      handleInvokeToolsEvent(event, fields, toolState);
+    if (IsToolsEndEvent(event)) {
+      handleToolsEndEvent(event, fields, toolState);
     }
     if (isChatModelStreamEvent(event)) {
       handleChatModelStreamEvent(event, fields);
