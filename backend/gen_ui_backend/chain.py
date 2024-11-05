@@ -57,8 +57,6 @@ def read_markdown_files(directory):
 
 
 def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
-    # Access the user information from the config
-
     system_prompt = read_markdown_files("gen_ui_backend/system_prompt")
 
     initial_prompt = ChatPromptTemplate.from_messages(
@@ -70,7 +68,7 @@ def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
             MessagesPlaceholder("input"),
         ]
     )
-    model = ChatOpenAI(model="gpt-4o-mini", temperature=0.5, streaming=True)
+    model = ChatOpenAI(model="gpt-4o-mini", temperature=0, streaming=True)
     tools = [github_repo, weather_data, calendly]
     model_with_tools = model.bind_tools(tools)
     chain = initial_prompt | model_with_tools
@@ -79,10 +77,7 @@ def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
     if not isinstance(result, AIMessage):
         raise ValueError("Invalid result from model. Expected AIMessage.")
 
-    if isinstance(result.tool_calls, list) and len(result.tool_calls) > 0:
-        return {"messages": ensure_array(result)}
-    else:
-        return {"messages": ensure_array(result)}
+    return {"messages": ensure_array(result)}
 
 
 def invoke_tools_or_return(state: MessagesState) -> str:
@@ -108,15 +103,30 @@ def invoke_tools(state: MessagesState) -> MessagesState:
 
     last_message = state["messages"][-1]
 
-    if last_message.tool_calls is not None:
-        tool = last_message.tool_calls[0]
-        selected_tool = tools_map[tool["name"]]
-        tool_result = selected_tool.invoke(tool["args"])
-        tool_result["type"] = "text"
-        tool_result = ToolMessage(content=[tool_result], tool_call_id=tool["id"])
-        return {"messages": ensure_array(tool_result)}
-    else:
-        raise ValueError("No tool calls found in state.")
+    try:
+        if last_message.tool_calls is not None:
+            tool = last_message.tool_calls[0]
+            selected_tool = tools_map[tool["name"]]
+            tool_result = selected_tool.invoke(tool["args"])
+            tool_result["type"] = "text"
+            tool_result = ToolMessage(content=[tool_result], tool_call_id=tool["id"])
+            print(tool_result)
+            return {"messages": ensure_array(tool_result)}
+        else:
+            raise ValueError("No tool calls found in state.")
+    except Exception as e:
+        # TODO replace with logger
+        print(e)
+        return {
+            "messages": ensure_array(
+                ToolMessage(
+                    content={
+                        "error": "An error occurred while processing the tool call."
+                    },
+                    tool_call_id=tool["id"],
+                )
+            )
+        }
 
 
 def create_graph(conn) -> CompiledGraph:
