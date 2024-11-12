@@ -115,7 +115,7 @@ async function agent(inputs: { input: string; thread_id: string }) {
 
     const toolData = event.data.output;
 
-    if (toolData.error) {
+    if (toolData.error && toolState.selectedToolComponent.error) {
       toolState.selectedToolUI.done(
         toolState.selectedToolComponent.error(toolData)
       );
