@@ -7,5 +7,6 @@ from pydantic import BaseModel
 class ChatMessage(BaseModel):
     messages: List[Union[HumanMessage, AIMessage, SystemMessage]]
 
+
 class ChatInput(ChatMessage):
     thread_id: str

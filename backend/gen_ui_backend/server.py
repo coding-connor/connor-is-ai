@@ -1,4 +1,3 @@
-import json
 import os
 from psycopg import Connection
 import uvicorn
@@ -95,5 +94,9 @@ add_routes(
 app.include_router(chat_session, prefix="/chat-session")
 
 
-def start():
-    uvicorn.run("gen_ui_backend.server:app", host="0.0.0.0", port=8000, reload=True)
+def start(reload=True):
+    uvicorn.run("gen_ui_backend.server:app", host="0.0.0.0", port=8000, reload=reload)
+
+
+if __name__ == "__main__":
+    start(reload=False)

@@ -28,8 +28,11 @@ def get_or_create_chat_session(db: Session, user_email: str) -> ChatSession:
         db.refresh(chat_session)
     return chat_session
 
+
 def new_session(db: Session, user_email: str, session_id: str) -> None:
-    chat_session = db.query(ChatSession).filter(ChatSession.session_id == session_id).first()
+    chat_session = (
+        db.query(ChatSession).filter(ChatSession.session_id == session_id).first()
+    )
     if chat_session and not chat_session.ended_at:
         chat_session.ended_at = datetime.now(timezone.utc)
         db.commit()
