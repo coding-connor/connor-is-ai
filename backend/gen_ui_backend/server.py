@@ -24,10 +24,12 @@ app = FastAPI(
     dependencies=[Depends(auth_dependency)],
 )
 
+# TODO load from env
 # Configure CORS
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "https://connor-haines.vercel.app",
 ]
 
 app.add_middleware(
