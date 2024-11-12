@@ -24,7 +24,7 @@ import { cookies } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthToken } from "@/utils/server-token";
 
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/chat`;
+const API_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`;
 
 type ToolComponent<T = any> = {
   loading: (props?: T) => JSX.Element;
