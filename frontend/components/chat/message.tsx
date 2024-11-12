@@ -53,16 +53,11 @@ export function AIMessageText(props: MessageTextProps) {
               const { children, className, node, ...rest } = props;
               const match = /language-(\w+)/.exec(className || "");
               return match ? (
-                <SyntaxHighlighter
-                  {...rest}
-                  PreTag="div"
-                  children={String(children).replace(/\n$/, "")}
-                  language={match[1]}
-                />
+                <SyntaxHighlighter language={match[1]} PreTag="div">
+                  {String(children).replace(/\n$/, "")}
+                </SyntaxHighlighter>
               ) : (
-                <code {...rest} className={className}>
-                  {children}
-                </code>
+                <code className={className}>{children}</code>
               );
             },
           }}
