@@ -18,7 +18,7 @@ export default function Home() {
 
       <div className="w-full max-w-[900px] flex flex-col gap-2">
         <Image
-          src="/avatars/me.png"
+          src={"/avatars/me.png"}
           alt="Avatar Logo"
           width={200}
           height={200}

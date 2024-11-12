@@ -193,7 +193,7 @@ export default function Page() {
   return (
     <div className="flex flex-col justify-center items-center h-screen p-1">
       <img
-        src="/avatars/me.png"
+        src={"/avatars/me.png"}
         alt="Avatar Logo"
         width={200}
         height={200}
