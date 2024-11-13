@@ -1,0 +1,35 @@
+frontend:
+  name: connor-frontend
+  image:
+    repository: connor-frontend
+    tag: latest
+  replicas: 1
+  service:
+    port: 3000
+  ingress:
+    enabled: true
+    host: connor-ai.local
+
+backend:
+  name: connor-backend
+  image:
+    repository: connor-backend
+    tag: latest
+  replicas: 1
+  service:
+    port: 8000
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+  env:
+    NODE_ENV: production
+  calendly:
+    account: connor-haines
+  integrations:
+    langchain:
+      tracingV2: true
+      endpoint: https://api.smith.langchain.com

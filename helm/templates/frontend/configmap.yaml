@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connor-frontend-config
+data:
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL: "{{ .Values.frontend.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL }}"
+  NEXT_PUBLIC_CLERK_SIGN_UP_URL: "{{ .Values.frontend.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL }}"
+  NEXT_PUBLIC_BACKEND_URL: "{{ .Values.frontend.env.NEXT_PUBLIC_BACKEND_URL }}"

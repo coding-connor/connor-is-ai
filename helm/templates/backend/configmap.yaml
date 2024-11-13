@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connor-ai-config
+data:
+  LANGCHAIN_TRACING_V2: "{{ .Values.backend.integrations.langchain.tracingV2 }}"
+  LANGCHAIN_ENDPOINT: "{{ .Values.backend.integrations.langchain.endpoint }}"
+  CALENDLY_ACCOUNT: "{{ .Values.backend.calendly.account }}"
+  DB_HOST: "{{ .Values.backend.database.host }}"
+  DB_NAME: "{{ .Values.backend.database.name }}"
+  DB_PORT: "{{ .Values.backend.database.port }}"
+  DB_USER: "{{ .Values.backend.database.user }}"

@@ -24,7 +24,7 @@ import { cookies } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthToken } from "@/utils/server-token";
 
-const API_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`;
+const API_URL = "http://connor-backend.default.svc.cluster.local:8000/chat";
 
 type ToolComponent<T = any> = {
   loading: (props?: T) => JSX.Element;
@@ -94,13 +94,13 @@ async function agent(inputs: { input: string; thread_id: string }) {
   const handleToolStartEventt: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields,
-    toolState: ToolState
+    toolState: ToolState,
   ) => {
     const toolCall = event.name;
     if (!toolState.selectedToolComponent && !toolState.selectedToolUI) {
       toolState.selectedToolComponent = TOOL_COMPONENT_MAP[toolCall];
       toolState.selectedToolUI = createStreamableUI(
-        toolState.selectedToolComponent.loading()
+        toolState.selectedToolComponent.loading(),
       );
       fields.ui.append(toolState.selectedToolUI?.value);
     }
@@ -109,7 +109,7 @@ async function agent(inputs: { input: string; thread_id: string }) {
   const handleToolsEndEvent: EventHandler = (
     event: StreamEvent,
     fields: EventHandlerFields,
-    toolState: ToolState
+    toolState: ToolState,
   ) => {
     if (!toolState.selectedToolUI || !toolState.selectedToolComponent) return;
 
@@ -117,19 +117,19 @@ async function agent(inputs: { input: string; thread_id: string }) {
 
     if (toolData.error && toolState.selectedToolComponent.error) {
       toolState.selectedToolUI.done(
-        toolState.selectedToolComponent.error(toolData)
+        toolState.selectedToolComponent.error(toolData),
       );
       return;
     }
     console.log("Tool data:", toolData);
     toolState.selectedToolUI.done(
-      toolState.selectedToolComponent.final(toolData)
+      toolState.selectedToolComponent.final(toolData),
     );
   };
 
   const handleChatModelStreamEvent: EventHandler = (
     event: StreamEvent,
-    fields: EventHandlerFields
+    fields: EventHandlerFields,
   ) => {
     if (!fields.callbacks[event.run_id]) {
       const textStream = createStreamableValue();
@@ -144,7 +144,7 @@ async function agent(inputs: { input: string; thread_id: string }) {
 
   const dispatchEventHandlers: EventHandler = (
     event: StreamEvent,
-    fields: EventHandlerFields
+    fields: EventHandlerFields,
   ) => {
     if (isToolStartEvent(event)) {
       handleToolStartEventt(event, fields, toolState);
@@ -172,7 +172,7 @@ async function agent(inputs: { input: string; thread_id: string }) {
     },
     {
       dispatchEventHandlers,
-    }
+    },
   );
 }
 

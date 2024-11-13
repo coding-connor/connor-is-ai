@@ -1,0 +1,5 @@
+apiVersion: v2
+name: connor-ai
+description: Helm chart for Connor AI frontend and backend services
+version: 0.1.0
+type: application

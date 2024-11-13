@@ -30,6 +30,8 @@ origins = [
     "http://localhost",
     "http://localhost:3000",
     "https://connor-haines.vercel.app",
+    "http://host.docker.internal:3000",
+    "http://connor-frontend:3000",
 ]
 
 app.add_middleware(
