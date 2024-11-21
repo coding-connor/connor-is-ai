@@ -64,8 +64,8 @@ resource "google_container_cluster" "primary" {
 # Artifact Registry
 resource "google_artifact_registry_repository" "docker_repo" {
   location      = var.region
-  repository_id = var.project_id
-  description   = "Docker repository for Connor AI"
+  repository_id = "connor-is-ai"
+  description   = "Docker repository for connor-is-ai"
   format        = "DOCKER"
   
   labels = {
@@ -86,7 +86,8 @@ resource "google_project_iam_binding" "github_actions_permissions" {
   for_each = toset([
     "roles/container.developer",
     "roles/storage.admin",
-    "roles/artifactregistry.admin"
+    "roles/artifactregistry.admin",
+    "roles/secretmanager.secretAccessor"
   ])
   
   project = var.project_id

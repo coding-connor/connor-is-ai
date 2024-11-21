@@ -61,6 +61,8 @@ jobs:
               database:
                 password: $(cat .secrets/DB_PASSWORD)
                 directUrl: $(cat .secrets/DB_DIRECT_URL)
+                user: $(cat .secrets/DB_USER)
+                host: $(cat .secrets/DB_HOST)
           frontend:
             secrets:
               clerk:
