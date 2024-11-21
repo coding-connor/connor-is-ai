@@ -5,6 +5,8 @@ backend:
   ingress:
     enabled: true
     host: api.connor-haines.com
+  database:
+    port: 6543
 
 frontend:
   image:
