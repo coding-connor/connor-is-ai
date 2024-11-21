@@ -1,6 +1,5 @@
 backend:
   image:
-    repository: us-west1-docker.pkg.dev/{{ .Values.projectId }}/connor-is-ai/backend
     tag: latest
   ingress:
     enabled: true
@@ -10,7 +9,6 @@ backend:
 
 frontend:
   image:
-    repository: us-west1-docker.pkg.dev/{{ .Values.projectId }}/connor-is-ai/frontend
     tag: latest
   env:
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in

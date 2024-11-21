@@ -94,6 +94,8 @@ jobs:
         run: |
           helm upgrade --install myapp ./helm \
             --set projectId=${{ secrets.PROJECT_ID }} \
+            --set backend.image.repository=us-west1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/connor-is-ai/backend \
+            --set frontend.image.repository=us-west1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/connor-is-ai/frontend \
             -f helm/values.yaml \
             -f helm/values-prod.yaml \
             -f values-secrets.yaml \
