@@ -1,0 +1,19 @@
+backend:
+  image:
+    repository: us-west1-docker.pkg.dev/{{ .Values.projectId }}/connor-is-ai/backend
+    tag: latest
+  ingress:
+    enabled: true
+    host: api.connor-haines.com
+
+frontend:
+  image:
+    repository: us-west1-docker.pkg.dev/{{ .Values.projectId }}/connor-is-ai/frontend
+    tag: latest
+  env:
+    NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+    NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+    NEXT_PUBLIC_BACKEND_URL: https://api.connor-haines.com
+  ingress:
+    enabled: true
+    host: connor-haines.com

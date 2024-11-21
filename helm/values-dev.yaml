@@ -1,12 +1,19 @@
 backend:
+  image:
+    repository: connor-backend
+    tag: latest
   database:
-    name: postgres
-    host: aws-0-us-west-1.pooler.supabase.com
     port: 6543
-    user: postgres.nltyxnhugyvgzoqypewh
+  ingress:
+    host: localhost
 
 frontend:
+  image:
+    repository: connor-frontend
+    tag: latest
   env:
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
     NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
+  ingress:
+    host: localhost

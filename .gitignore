@@ -45,3 +45,12 @@ jspm_packages/
 
 # helm
 secrets-*.yaml
+
+# terraform
+terraform/.terraform
+terraform/*.tfstate
+terraform/*.tfstate.backupterr
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars

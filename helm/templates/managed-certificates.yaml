@@ -1,0 +1,20 @@
+{{- if ne .Values.frontend.ingress.host "localhost" }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{.Values.frontend.ingress.host}}-certificate
+spec:
+  domains:
+    - {{.Values.frontend.ingress.host}}
+{{- end }}
+
+{{- if ne .Values.backend.ingress.host "localhost" }}
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{.Values.backend.ingress.host}}-certificate
+spec:
+  domains:
+    - {{.Values.backend.ingress.host}}
+{{- end }}

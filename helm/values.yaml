@@ -1,20 +1,13 @@
 frontend:
   name: connor-frontend
-  image:
-    repository: connor-frontend
-    tag: latest
   replicas: 1
   service:
     port: 3000
   ingress:
     enabled: true
-    host: connor-ai.local
 
 backend:
   name: connor-backend
-  image:
-    repository: connor-backend
-    tag: latest
   replicas: 1
   service:
     port: 8000

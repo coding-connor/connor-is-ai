@@ -1,0 +1,84 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Auth to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure GKE
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
+          location: us-west1
+
+      - name: Build & Push Frontend
+        run: |
+          gcloud auth configure-docker us-west1-docker.pkg.dev
+          docker build \
+            --build-arg NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in \
+            --build-arg NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up \
+            --build-arg NEXT_PUBLIC_BACKEND_URL=https://api.connor-haines.com \
+            -t us-west1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/connor-is-ai/frontend:${{ github.sha }} ./frontend
+          docker push us-west1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/connor-is-ai/frontend:${{ github.sha }}
+
+      - name: Build & Push Backend
+        run: |
+          docker build -t us-west1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/connor-is-ai/backend:${{ github.sha }} ./backend
+          docker push us-west1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/connor-is-ai/backend:${{ github.sha }}
+
+      - name: Fetch Secrets
+        run: |
+          mkdir -p .secrets
+          set -e  # Exit on any error
+          for secret in OPENAI_API_KEY LANGCHAIN_API_KEY GITHUB_TOKEN CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY DB_PASSWORD DB_DIRECT_URL; do
+            if ! gcloud secrets versions access latest --secret=$secret > .secrets/$secret; then
+              echo "Failed to fetch secret: $secret"
+              exit 1
+            fi
+          done
+
+      - name: Generate Secret Values File
+        run: |
+          cat << EOF > values-secrets.yaml
+          backend:
+            secrets:
+              openai:
+                apiKey: $(cat .secrets/OPENAI_API_KEY)
+              langchain:
+                apiKey: $(cat .secrets/LANGCHAIN_API_KEY)
+              github:
+                token: $(cat .secrets/GITHUB_TOKEN)
+              clerk:
+                publishableKey: $(cat .secrets/CLERK_PUBLISHABLE_KEY)
+                secretKey: $(cat .secrets/CLERK_SECRET_KEY)
+              database:
+                password: $(cat .secrets/DB_PASSWORD)
+                directUrl: $(cat .secrets/DB_DIRECT_URL)
+          frontend:
+            secrets:
+              clerk:
+                publishableKey: $(cat .secrets/CLERK_PUBLISHABLE_KEY)
+                secretKey: $(cat .secrets/CLERK_SECRET_KEY)
+          EOF
+
+      - name: Deploy
+        run: |
+          helm upgrade --install myapp ./helm \
+            --set projectId=${{ secrets.PROJECT_ID }} \
+            -f helm/values.yaml \
+            -f helm/values-prod.yaml \
+            -f values-secrets.yaml \
+            --set frontend.image.tag=${{ github.sha }} \
+            --set backend.image.tag=${{ github.sha }}
+
+      - name: Cleanup Secrets
+        if: always()
+        run: |
+          rm -rf .secrets values-secrets.yaml

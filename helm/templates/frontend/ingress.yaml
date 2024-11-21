@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{.Values.frontend.name}}
+  annotations:
+    networking.gke.io/managed-certificates: {{.Values.frontend.ingress.host}}-certificate
 spec:
   rules:
     - host: {{.Values.frontend.ingress.host}}
