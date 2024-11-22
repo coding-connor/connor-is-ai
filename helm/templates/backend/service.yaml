@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{.Values.backend.name}}
   annotations:
-    cloud.google.com/backend-config: '{"default": "backend-health"}'
+    cloud.google.com/backend-config: '{"ports": {"8000":"backend-health"}}'
 spec:
   type: ClusterIP
   ports:

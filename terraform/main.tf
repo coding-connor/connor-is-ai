@@ -134,7 +134,7 @@ resource "google_dns_managed_zone" "default" {
 # Get frontend ingress IP
 data "kubernetes_ingress_v1" "frontend" {
   metadata {
-    name = "frontend"
+    name = "connor-frontend"
     namespace = "default"
   }
   depends_on = [google_container_cluster.primary]
@@ -143,7 +143,7 @@ data "kubernetes_ingress_v1" "frontend" {
 # Get backend ingress IP
 data "kubernetes_ingress_v1" "backend" {
   metadata {
-    name = "backend-api-ingress"
+    name = "connor-backend-ingress"
     namespace = "default"
   }
   depends_on = [google_container_cluster.primary]
