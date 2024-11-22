@@ -22,3 +22,10 @@ spec:
                 name: connor-ai-secrets
             - configMapRef:
                 name: connor-ai-config
+          resources:
+            requests:
+              memory: "{{ .Values.backend.resources.requests.memory }}"
+              cpu: "{{ .Values.backend.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.backend.resources.limits.memory }}"
+              cpu: "{{ .Values.backend.resources.limits.cpu }}"

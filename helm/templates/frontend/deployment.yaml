@@ -22,3 +22,10 @@ spec:
                 name: connor-frontend-config
             - secretRef:
                 name: connor-frontend-secrets
+          resources:
+            requests:
+              memory: "{{ .Values.frontend.resources.requests.memory }}"
+              cpu: "{{ .Values.frontend.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.frontend.resources.limits.memory }}"
+              cpu: "{{ .Values.frontend.resources.limits.cpu }}"

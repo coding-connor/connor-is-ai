@@ -6,6 +6,13 @@ backend:
     host: api.connor-haines.com
   database:
     port: 6543
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
 
 frontend:
   image:
@@ -17,3 +24,10 @@ frontend:
   ingress:
     enabled: true
     host: connor-haines.com
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "200m"
+      memory: "256Mi"

@@ -6,6 +6,13 @@ backend:
     port: 6543
   ingress:
     host: localhost
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
 
 frontend:
   image:
@@ -17,3 +24,10 @@ frontend:
     NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
   ingress:
     host: localhost
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
