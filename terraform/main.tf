@@ -148,9 +148,13 @@ resource "null_resource" "install_ingress" {
 
 # DNS Zone
 resource "google_dns_managed_zone" "default" {
-  name        = "connor-haines-zone"
+  name        = "connor-haines-com"
   dns_name    = "connor-haines.com."
-  description = "Connor Haines DNS zone"
+  description = "DNS zone for domain: connor-haines.com"
+
+  dnssec_config {
+    state = "on"
+  }
 }
 
 # DNS Records using GKE ingress IP

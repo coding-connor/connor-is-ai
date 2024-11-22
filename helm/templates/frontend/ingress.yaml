@@ -5,6 +5,7 @@ metadata:
   annotations:
     networking.gke.io/managed-certificates: {{.Values.frontend.ingress.host}}-certificate
 spec:
+  ingressClassName: nginx
   rules:
     - host: {{.Values.frontend.ingress.host}}
       http:
