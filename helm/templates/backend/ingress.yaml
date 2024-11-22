@@ -4,8 +4,9 @@ metadata:
   name: {{.Values.backend.name}}-ingress
   annotations:
     networking.gke.io/managed-certificates: {{.Values.backend.ingress.host}}-certificate
+    cloud.google.com/backend-config: '{"default": "backend-health"}'
+    kubernetes.io/ingress.class: "gce" 
 spec:
-  ingressClassName: nginx
   rules:
     - host: {{.Values.backend.ingress.host}}
       http:

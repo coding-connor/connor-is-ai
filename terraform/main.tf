@@ -120,32 +120,6 @@ resource "google_secret_manager_secret" "app_secrets" {
   }
 }
 
-# Get GKE ingress IP
-data "kubernetes_service" "ingress_nginx" {
-  metadata {
-    name      = "ingress-nginx-controller"
-    namespace = "default"  # Update if you installed in different namespace
-  }
-  depends_on = [
-    google_container_cluster.primary,
-    # Add local exec to ensure ingress is installed
-    null_resource.install_ingress
-  ]
-}
-
-# Ensure ingress controller is installed
-resource "null_resource" "install_ingress" {
-  depends_on = [google_container_cluster.primary]
-  
-  provisioner "local-exec" {
-    command = <<-EOT
-      helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-      helm repo update
-      helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx
-    EOT
-  }
-}
-
 # DNS Zone
 resource "google_dns_managed_zone" "default" {
   name        = "connor-haines-com"
@@ -157,13 +131,30 @@ resource "google_dns_managed_zone" "default" {
   }
 }
 
-# DNS Records using GKE ingress IP
+# Get frontend ingress IP
+data "kubernetes_ingress_v1" "frontend" {
+  metadata {
+    name = "frontend"
+    namespace = "default"
+  }
+  depends_on = [google_container_cluster.primary]
+}
+
+# Get backend ingress IP
+data "kubernetes_ingress_v1" "backend" {
+  metadata {
+    name = "backend-api-ingress"
+    namespace = "default"
+  }
+  depends_on = [google_container_cluster.primary]
+}
+
 resource "google_dns_record_set" "frontend" {
   name         = google_dns_managed_zone.default.dns_name
   type         = "A"
   ttl          = 300
   managed_zone = google_dns_managed_zone.default.name
-  rrdatas      = [data.kubernetes_service.ingress_nginx.status[0].load_balancer[0].ingress[0].ip]
+  rrdatas      = [data.kubernetes_ingress_v1.frontend.status[0].load_balancer[0].ingress[0].ip]
 }
 
 resource "google_dns_record_set" "backend" {
@@ -171,5 +162,5 @@ resource "google_dns_record_set" "backend" {
   type         = "A"
   ttl          = 300
   managed_zone = google_dns_managed_zone.default.name
-  rrdatas      = [data.kubernetes_service.ingress_nginx.status[0].load_balancer[0].ingress[0].ip]
+  rrdatas      = [data.kubernetes_ingress_v1.backend.status[0].load_balancer[0].ingress[0].ip]
 }

@@ -4,8 +4,8 @@ metadata:
   name: {{.Values.frontend.name}}
   annotations:
     networking.gke.io/managed-certificates: {{.Values.frontend.ingress.host}}-certificate
+    kubernetes.io/ingress.class: "gce" 
 spec:
-  ingressClassName: nginx
   rules:
     - host: {{.Values.frontend.ingress.host}}
       http:

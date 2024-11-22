@@ -1,0 +1,12 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: backend-health
+spec:
+  healthCheck:
+    checkIntervalSec: 300
+    timeoutSec: 10
+    type: HTTP
+    requestPath: /docs
+    port: 8000
+# TODO replace with a health check endpoint
