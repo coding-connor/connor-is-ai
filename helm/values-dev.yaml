@@ -6,6 +6,8 @@ backend:
     port: 6543
   ingress:
     host: localhost
+  origins:
+    allowedOrigins: "http://localhost,http://localhost:3000,http://host.docker.internal:3000,http://connor-frontend:3000,https://connor-haines.com"
   resources:
     limits:
       cpu: "200m"

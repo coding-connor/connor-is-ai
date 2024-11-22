@@ -4,6 +4,8 @@ backend:
   ingress:
     enabled: true
     host: api.connor-haines.com
+  origins:
+    allowedOrigins: "https://connor-haines.com,http://connor-frontend.default.svc.cluster.local"
   database:
     port: 6543
   resources:
