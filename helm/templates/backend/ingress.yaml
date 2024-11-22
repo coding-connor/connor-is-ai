@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   name: {{.Values.backend.name}}-ingress
   annotations:
+    kubernetes.io/ingress.global-static-ip-name: "backend-static-ip"
     networking.gke.io/managed-certificates: {{.Values.backend.ingress.host}}-certificate
     cloud.google.com/backend-config: '{"ports": {"8000": "backend-health"}}'
     kubernetes.io/ingress.class: "gce" 

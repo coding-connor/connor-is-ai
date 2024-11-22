@@ -4,6 +4,7 @@ metadata:
   name: {{.Values.backend.name}}
   annotations:
     cloud.google.com/backend-config: '{"ports": {"8000":"backend-health"}}'
+    networking.gke.io/v1beta1.FrontendConfig: "https-redirect"
 spec:
   type: ClusterIP
   ports:

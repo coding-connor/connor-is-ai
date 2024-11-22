@@ -7,3 +7,4 @@ data:
   LANGCHAIN_ENDPOINT: "{{ .Values.backend.integrations.langchain.endpoint }}"
   CALENDLY_ACCOUNT: "{{ .Values.backend.calendly.account }}"
   DB_PORT: "{{ .Values.backend.database.port }}"
+

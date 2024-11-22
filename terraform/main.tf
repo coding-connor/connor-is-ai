@@ -131,22 +131,13 @@ resource "google_dns_managed_zone" "default" {
   }
 }
 
-# Get frontend ingress IP
-data "kubernetes_ingress_v1" "frontend" {
-  metadata {
-    name = "connor-frontend"
-    namespace = "default"
-  }
-  depends_on = [google_container_cluster.primary]
+# Static IPs for Ingress
+resource "google_compute_global_address" "frontend_ip" {
+  name = "frontend-static-ip"
 }
 
-# Get backend ingress IP
-data "kubernetes_ingress_v1" "backend" {
-  metadata {
-    name = "connor-backend-ingress"
-    namespace = "default"
-  }
-  depends_on = [google_container_cluster.primary]
+resource "google_compute_global_address" "backend_ip" {
+  name = "backend-static-ip"
 }
 
 resource "google_dns_record_set" "frontend" {
@@ -154,7 +145,7 @@ resource "google_dns_record_set" "frontend" {
   type         = "A"
   ttl          = 300
   managed_zone = google_dns_managed_zone.default.name
-  rrdatas      = [data.kubernetes_ingress_v1.frontend.status[0].load_balancer[0].ingress[0].ip]
+  rrdatas      = [google_compute_global_address.frontend_ip.address]
 }
 
 resource "google_dns_record_set" "backend" {
@@ -162,5 +153,5 @@ resource "google_dns_record_set" "backend" {
   type         = "A"
   ttl          = 300
   managed_zone = google_dns_managed_zone.default.name
-  rrdatas      = [data.kubernetes_ingress_v1.backend.status[0].load_balancer[0].ingress[0].ip]
+  rrdatas      = [google_compute_global_address.backend_ip.address]
 }
