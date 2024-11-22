@@ -19,7 +19,7 @@ async def chat_session_endpoint(
     user_email: str = Depends(auth_dependency),
 ):
     try:
-        session = get_or_create_chat_session(db, user_email)
+        session = initial_chat_setup(db, user_email)
         return {"session_id": str(session.session_id)}
     except Exception as e:
         print(e)
