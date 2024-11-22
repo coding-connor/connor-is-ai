@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{.Values.frontend.name}}
+  annotations:
+    cloud.google.com/backend-config: '{"ports": {"3000":"frontend-health"}}'
+    networking.gke.io/v1beta1.FrontendConfig: "https-redirect"
 spec:
   type: ClusterIP
   ports:

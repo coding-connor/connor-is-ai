@@ -6,6 +6,7 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: "frontend-static-ip"
     networking.gke.io/managed-certificates: {{.Values.frontend.ingress.host}}-certificate
     networking.gke.io/v1beta1.FrontendConfig: "https-redirect"
+    cloud.google.com/backend-config: '{"ports": {"3000": "frontend-health"}}'
     kubernetes.io/ingress.class: "gce" 
 spec:
   rules:
