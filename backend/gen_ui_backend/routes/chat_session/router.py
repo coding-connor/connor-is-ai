@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from gen_ui_backend.utils.database import get_session as get_db_session
 from gen_ui_backend.routes.chat_session.service import (
-    get_or_create_chat_session,
+    initial_chat_setup,
     new_session,
 )
 
