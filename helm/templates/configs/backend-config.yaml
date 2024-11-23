@@ -9,9 +9,6 @@ spec:
     type: HTTP
     requestPath: /docs
     port: 8000
-    initialDelaySeconds: 40
-    periodSeconds: 10
-    failureThreshold: 3
 
 ---
 apiVersion: cloud.google.com/v1
