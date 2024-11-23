@@ -10,8 +10,8 @@ backend:
     allowedOrigins: "http://localhost,http://localhost:3000,http://host.docker.internal:3000,http://connor-frontend:3000,https://connor-haines.com"
   resources:
     limits:
-      cpu: "200m"
-      memory: "256Mi"
+      cpu: "500m"
+      memory: "512Mi"
     requests:
       cpu: "100m"
       memory: "128Mi"
@@ -28,8 +28,8 @@ frontend:
     host: localhost
   resources:
     limits:
-      cpu: "200m"
-      memory: "256Mi"
+      cpu: "1500m"
+      memory: "2Gi"
     requests:
-      cpu: "100m"
-      memory: "128Mi"
+      cpu: "500m"
+      memory: "512Mi"

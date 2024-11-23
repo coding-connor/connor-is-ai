@@ -18,16 +18,22 @@ docker_build_with_restart(
 )
 
 # Frontend build configuration
+# Use: tilt up -- --build_mode=prod
 if cfg.get('build_mode') == 'prod':
     docker_build_with_restart(
         'connor-frontend', 
         './frontend',
-        dockerfile='Dockerfile',
+        dockerfile='frontend/Dockerfile',
         build_args={
             'NEXT_PUBLIC_CLERK_SIGN_IN_URL': '/sign-in',
             'NEXT_PUBLIC_CLERK_SIGN_UP_URL': '/sign-up',
             'NEXT_PUBLIC_BACKEND_URL': 'http://localhost:8000'
-        }
+        },
+        entrypoint=['npm', 'start'],
+        live_update=[
+            sync('./frontend', '/app'),
+            run('npm install', trigger='./frontend/package.json')
+        ]
     )
 else:
     docker_build_with_restart(
