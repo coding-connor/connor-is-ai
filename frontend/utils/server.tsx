@@ -35,7 +35,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
   inputs: RunInput,
   options: {
     dispatchEventHandlers: DispatchEventHandlers;
-  }
+  },
 ) {
   // Note: We will mutate this object in the future
   const ui = createStreamableUI();
@@ -57,45 +57,26 @@ export function streamRunnableUI<RunInput, RunOutput>(
           // Note: The EventHandlers determine which events we care about.
           excludeNames: [
             "ChannelWrite<invoke_model,input,result,tool_calls,tool_result>",
-            // "ChannelWrite<invoke_tools,input,result,tool_calls,tool_result>",
-            // "ChannelWrite<invoke_tools,input,result,tool_calls,tool_result>",
+            "ChannelWrite<invoke_tools,input,result,tool_calls,tool_result>",
+            "ChannelWrite<invoke_tools,input,result,tool_calls,tool_result>",
             "ChannelWrite<invoke_tools,messages>",
             "ChannelWrite<invoke_model,messages>",
-            // "invoke_tools_or_return",
+            "invoke_tools_or_return",
             "RunnableSequence",
             "LangGraph",
             "/chat",
-            // "__start__",
-            // "ChatPromptTemplate",
+            "__start__",
+            "ChatPromptTemplate",
             "JsonOutputToolsParser",
             "",
           ],
-        }
+        },
       )) {
-        console.log("Stream event:", streamEvent);
-        if (
-          streamEvent.event === "on_chain_end" &&
-          streamEvent.name === "invoke_model"
-        ) {
-          console.log("Invoke model event....");
-          console.log("Stream event data:", streamEvent.data);
-          console.log("Stream event data output:", streamEvent.data.output);
-          console.log(
-            "Stream event data output messages:",
-            streamEvent.data.output.messages
-          );
-          console.log(
-            "Stream event data output messages tool calls:",
-            streamEvent.data.output.messages.tool_calls
-          );
-        }
-
         const fields: EventHandlerFields = { ui, callbacks };
         await options.dispatchEventHandlers(streamEvent, fields);
         lastEventValue = streamEvent;
       }
 
-      console.log("Last event value:", lastEventValue);
       let lastEventOutput =
         lastEventValue?.data.output || lastEventValue?.data.chunk?.data?.output;
       const resolveValue = JSON.parse(JSON.stringify(lastEventOutput));
@@ -141,7 +122,7 @@ export function withResolvers<T>() {
  * @param actions
  */
 export function exposeEndpoints<T extends Record<string, unknown>>(
-  actions: T
+  actions: T,
 ): {
   (props: { children: ReactNode }): Promise<JSX.Element>;
   $$types?: T;

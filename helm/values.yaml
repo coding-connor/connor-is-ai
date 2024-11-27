@@ -5,7 +5,8 @@ frontend:
     port: 3000
   ingress:
     enabled: true
-
+  env:
+    INTERNAL_CONNOR_BACKEND_URL: http://connor-backend.default.svc.cluster.local
 backend:
   name: connor-backend
   replicas: 1
