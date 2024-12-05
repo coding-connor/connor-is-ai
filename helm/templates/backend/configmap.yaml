@@ -8,4 +8,5 @@ data:
   CALENDLY_ACCOUNT: "{{ .Values.backend.calendly.account }}"
   DB_PORT: "{{ .Values.backend.database.port }}"
   ALLOWED_ORIGINS: "{{ .Values.backend.origins.allowedOrigins }}"
-
+  STORAGE_TYPE: "{{ .Values.backend.storage.storageType }}"
+  BASE_DIR: "{{ .Values.backend.storage.baseDir }}"

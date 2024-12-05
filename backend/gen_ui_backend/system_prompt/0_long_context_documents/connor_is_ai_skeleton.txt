@@ -1,4 +1,4 @@
-Here's a comprehensive code skeleton that captures the system architecture of the provided codebase, focusing on the structural hierarchy, backend and frontend components, integration points, and overall organization.
+Here's a comprehensive code skeleton that captures the system architecture of the provided codebase, focusing on the structural hierarchy, backend and frontend components, integration points, and overall code organization.
 
 ### 1. STRUCTURAL HIERARCHY
 
@@ -23,60 +23,119 @@ class UserService(BaseService):
     async def get_user(self, id: str) -> Any:
         pass
 
-class ChatService(BaseService):
-    """Chat session management operations."""
-    async def create_session(self, user_id: str) -> Any:
-        pass
-
 # Type definitions and data models
-from sqlmodel import Field, SQLModel
+from sqlmodel import SQLModel
 import uuid
 from datetime import datetime
 
 class User(BaseModel, table=True):
-    user_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID
     email: str
+    sessions: List["ChatSession"]
 
 class ChatSession(BaseModel, table=True):
-    session_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="user.user_id")
+    session_id: uuid.UUID
+    user_id: uuid.UUID
     started_at: datetime
-    ended_at: datetime
+    ended_at: Optional[datetime]
 
 # Component hierarchies
-# - UserService
-#   - User
-# - ChatService
-#   - ChatSession
+class ChatMessage(BaseModel, table=True):
+    message_id: uuid.UUID
+    session_id: uuid.UUID
+    sender: str
+    content: str
+    timestamp: datetime
 
 # Integration points
-# - Database: PostgreSQL
-# - External APIs: OpenAI, GitHub, Weather API
+class DatabaseService:
+    """Handles database interactions."""
+    async def query(self, query: str) -> Any:
+        pass
+```
+
+#### Frontend
+```typescript
+// TypeScript interfaces and types
+interface User {
+    id: string;
+    email: string;
+}
+
+interface ChatMessage {
+    messageId: string;
+    sessionId: string;
+    sender: string;
+    content: string;
+    timestamp: string;
+}
+
+// React component hierarchies
+import React from 'react';
+
+const ChatComponent: React.FC<{ messages: ChatMessage[] }> = ({ messages }) => {
+    return (
+        <div>
+            {messages.map(msg => (
+                <div key={msg.messageId}>{msg.content}</div>
+            ))}
+        </div>
+    );
+};
+
+// Custom hooks and their signatures
+import { useState } from 'react';
+
+function useChat() {
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const sendMessage = (message: ChatMessage) => {
+        setMessages(prev => [...prev, message]);
+    };
+    return { messages, sendMessage };
+}
+
+// State management structures
+import { createContext, useContext } from 'react';
+
+const ChatContext = createContext<{ messages: ChatMessage[]; sendMessage: (msg: ChatMessage) => void } | undefined>(undefined);
+
+// API client interfaces
+async function fetchChatMessages(): Promise<ChatMessage[]> {
+    const response = await fetch('/api/chat');
+    return response.json();
+}
+
+// Utility functions
+function formatDate(date: string): string {
+    return new Date(date).toLocaleString();
+}
 ```
 
 ### 2. BACKEND SKELETON
 
 ```python
 # Data models and their relationships
-class ChatMessage(BaseModel, table=True):
-    message_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    session_id: uuid.UUID = Field(foreign_key="chatsession.session_id")
-    sender: str
-    content: str
-    timestamp: datetime
+class User(BaseModel, table=True):
+    user_id: uuid.UUID
+    email: str
+    sessions: List[ChatSession] = Relationship(back_populates="user")
+
+class ChatSession(BaseModel, table=True):
+    session_id: uuid.UUID
+    user_id: uuid.UUID
+    started_at: datetime
+    ended_at: Optional[datetime]
+    user: User = Relationship(back_populates="sessions")
+    messages: List[ChatMessage] = Relationship(back_populates="session")
 
 # Service layer interfaces and key methods
 class ChatService(BaseService):
-    async def send_message(self, session_id: str, content: str) -> ChatMessage:
+    async def create_session(self, user_id: uuid.UUID) -> ChatSession:
         pass
 
 # External integrations and tool abstractions
-class GithubIntegration:
-    async def fetch_repo_info(self, owner: str, repo: str) -> Any:
-        pass
-
-class WeatherIntegration:
-    async def get_weather(self, city: str, state: str) -> Any:
+class ExternalAPIService:
+    async def fetch_data(self, endpoint: str) -> Any:
         pass
 
 # API endpoint definitions
@@ -84,12 +143,8 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-@router.post("/chat/session")
-async def create_chat_session(user_id: str):
-    pass
-
-@router.post("/chat/message")
-async def send_chat_message(session_id: str, content: str):
+@router.post("/chat-session")
+async def create_chat_session(user_id: uuid.UUID):
     pass
 
 # Authentication and middleware structures
@@ -104,8 +159,8 @@ app.add_middleware(
 )
 
 # Utility and helper interfaces
-class DatabaseHelper:
-    async def get_session(self):
+class Logger:
+    def log(self, message: str) -> None:
         pass
 ```
 
@@ -127,42 +182,43 @@ interface ChatMessage {
 }
 
 // React component hierarchies
-import React from "react";
+import React from 'react';
 
-const Chat: React.FC = () => {
-    return <div>{/* Chat UI */}</div>;
-};
-
-const UserProfile: React.FC<{ user: User }> = ({ user }) => {
-    return <div>{user.email}</div>;
+const ChatComponent: React.FC<{ messages: ChatMessage[] }> = ({ messages }) => {
+    return (
+        <div>
+            {messages.map(msg => (
+                <div key={msg.messageId}>{msg.content}</div>
+            ))}
+        </div>
+    );
 };
 
 // Custom hooks and their signatures
-import { useState, useEffect } from "react";
+import { useState } from 'react';
 
-function useChatSession(userId: string) {
-    const [sessionId, setSessionId] = useState<string | null>(null);
-    useEffect(() => {
-        // Fetch session ID logic
-    }, [userId]);
-    return sessionId;
+function useChat() {
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const sendMessage = (message: ChatMessage) => {
+        setMessages(prev => [...prev, message]);
+    };
+    return { messages, sendMessage };
 }
 
 // State management structures
-import { createContext, useContext } from "react";
+import { createContext, useContext } from 'react';
 
-const ChatContext = createContext<{ messages: ChatMessage[] }>({ messages: [] });
+const ChatContext = createContext<{ messages: ChatMessage[]; sendMessage: (msg: ChatMessage) => void } | undefined>(undefined);
 
 // API client interfaces
-async function fetchChatMessages(sessionId: string): Promise<ChatMessage[]> {
-    const response = await fetch(`/api/chat/session/${sessionId}`);
+async function fetchChatMessages(): Promise<ChatMessage[]> {
+    const response = await fetch('/api/chat');
     return response.json();
 }
 
 // Utility functions
-function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleString();
+function formatDate(date: string): string {
+    return new Date(date).toLocaleString();
 }
 ```
 
@@ -170,31 +226,31 @@ function formatDate(dateString: string): string {
 
 ```python
 # External service interfaces
-class OpenAIService:
-    async def generate_response(self, prompt: str) -> str:
-        pass
-
 class GithubService:
-    async def get_repo_info(self, owner: str, repo: str) -> dict:
+    async def get_repo_info(self, owner: str, repo: str) -> Any:
         pass
 
 # API contracts between frontend and backend
-# - POST /chat/session
-# - POST /chat/message
+# Example API contract for chat messages
+@router.get("/chat")
+async def get_chat_messages():
+    pass
 
 # Event and message definitions
 class ChatEvent:
-    def __init__(self, type: str, data: dict):
-        self.type = type
-        self.data = data
+    def __init__(self, message: str):
+        self.message = message
 
 # Third-party tool integrations
-# - Calendly for scheduling
-# - GitHub API for repository information
-# - Weather API for weather data
+class CalendlyService:
+    async def schedule_meeting(self, details: dict) -> Any:
+        pass
 
 # Authentication flows
-# - JWT authentication for API access
+from fastapi import Depends
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    pass
 ```
 
 ### 5. CODE ORGANIZATION
@@ -203,18 +259,17 @@ class ChatEvent:
 src/
   ├── backend/       # Backend services
       ├── models/    # Data models
-      ├── services/  # Business logic services
+      ├── services/  # Business services
       ├── routes/    # API routes
       ├── utils/     # Utility functions
   ├── frontend/      # Frontend components
-      ├── components/ # UI components
+      ├── components/ # React components
       ├── hooks/      # Custom hooks
       ├── pages/      # Next.js pages
   └── shared/        # Shared utilities and types
 ```
 
 ### 6. FORMATTING GUIDELINES
-
 - Use proper type hints and generics.
 - Include docstrings for major components.
 - Show async/await patterns where applicable.
@@ -224,7 +279,6 @@ src/
 - Maintain consistent indentation.
 
 ### 7. WHAT TO EXCLUDE
-
 - Implementation details.
 - Complex business logic.
 - Configuration values.
@@ -233,7 +287,6 @@ src/
 - Documentation comments.
 
 ### 8. SPECIAL CONSIDERATIONS
-
 - Show both synchronous and asynchronous patterns.
 - Include error handling interfaces.
 - Show generic type constraints.

@@ -1,4 +1,7 @@
 backend:
+  storage:
+    storageType: gcp
+    baseDir: system_prompts # This is the bucket where the system prompts are stored
   image:
     tag: latest
   ingress:

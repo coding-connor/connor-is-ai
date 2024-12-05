@@ -1,4 +1,7 @@
 backend:
+  storage:
+    storageType: local
+    baseDir: system_prompts
   image:
     repository: connor-backend
     tag: latest

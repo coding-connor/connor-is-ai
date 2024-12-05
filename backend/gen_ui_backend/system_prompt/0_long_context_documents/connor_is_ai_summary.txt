@@ -3,140 +3,125 @@
 ## 1. OVERVIEW
 
 - **High-level purpose and main functionality of the system**:  
-  The system is designed to serve as a generative AI assistant, enabling users to interact with an AI representation of Connor Haines, a software engineer. It provides functionalities such as chat sessions, scheduling meetings, and retrieving information from external APIs (e.g., GitHub, weather data, and Calendly).
+  The system is designed to serve as a generative AI assistant, specifically tailored to represent Connor Haines, a software engineer transitioning into AI Engineering. It facilitates user interactions through a chat interface, allowing users to ask questions and receive responses that reflect Connor's expertise and personality.
 
 - **Target users and use cases**:  
-  The primary users are individuals or organizations interested in AI technology, software engineering, and potential job opportunities with Connor Haines. Use cases include:
-  - Engaging in technical discussions.
+  The primary users are potential employers, recruiters, and individuals interested in AI technologies. Use cases include:
+  - Conducting technical interviews or discussions.
   - Scheduling meetings with Connor.
-  - Retrieving information about software projects and technologies.
+  - Inquiring about Connor's work history and technical skills.
 
 - **Core technical stack and major dependencies**:  
   The backend is built using **FastAPI** and **SQLModel** for API development and database interactions, respectively. The frontend utilizes **Next.js** with **React** for building user interfaces. Key dependencies include:
-  - **FastAPI** for the backend framework.
-  - **SQLModel** for ORM and database management.
   - **LangChain** for AI functionalities.
   - **Clerk** for authentication.
+  - **PostgreSQL** for database management.
   - **Docker** for containerization.
-  - **Helm** for Kubernetes deployment.
 
 - **Key design principles and patterns used**:  
-  The codebase follows principles such as:
-  - **Separation of concerns**: Different modules handle specific functionalities (e.g., models, routes, utilities).
-  - **Dependency injection**: Utilized in FastAPI for managing dependencies.
-  - **Microservices architecture**: The backend is structured to allow independent deployment and scaling of services.
+  The system follows a microservices architecture, promoting separation of concerns. It employs:
+  - **Dependency Injection** for managing service dependencies.
+  - **Model-View-Controller (MVC)** pattern for organizing code.
+  - **Asynchronous programming** to handle concurrent requests efficiently.
 
 ## 2. ARCHITECTURE
 
 - **System components and their responsibilities**:  
-  - **Backend**: Handles API requests, manages chat sessions, and interacts with the database.
+  - **Backend**: Handles API requests, manages user sessions, and interacts with the database.
   - **Frontend**: Provides the user interface for interaction with the AI assistant.
   - **Database**: Stores user data, chat sessions, and other relevant information.
 
 - **Component interaction patterns and data flow**:  
   - Users interact with the frontend, which sends requests to the backend API.
   - The backend processes these requests, interacts with the database, and returns responses to the frontend.
-  - Data flows from the frontend to the backend and vice versa, with real-time updates for chat interactions.
+  - Data flows in a request-response cycle, with asynchronous handling to improve performance.
 
 - **Key interfaces and APIs**:  
   - **Chat Session API**: Manages chat sessions and user interactions.
-  - **External APIs**: Integrates with GitHub, weather services, and Calendly for additional functionalities.
+    - Endpoint: `GET /chat-session` for fetching session details.
+    - Endpoint: `POST /chat-session/new` for creating new sessions.
+  - **User Authentication API**: Handles user sign-in and sign-up processes through Clerk.
 
 - **Database schema and data models (if applicable)**:  
   The database schema includes tables for:
   - **Users**: Stores user information (e.g., email).
   - **Chat Sessions**: Tracks active and historical chat sessions.
-  - **Chat Messages**: Stores individual messages within sessions.
-
-  Example model definitions:
-  ```python
-  class User(Base, table=True):
-      user_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-      email: str = Field(default=None)
-
-  class ChatSession(Base, table=True):
-      session_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-      user_id: uuid.UUID = Field(foreign_key="user.user_id", index=True)
-  ```
+  - **Chat Messages**: Records individual messages within sessions.
 
 - **Authentication and security mechanisms**:  
-  The system uses **Clerk** for user authentication, ensuring secure access to the application. JWT tokens are utilized for session management, and sensitive data is stored in Google Cloud Secret Manager.
+  The system uses **JWT** for user authentication, with public/private key pairs for signing tokens. Sensitive information is stored in **Google Cloud Secret Manager**.
 
 ## 3. CODE ORGANIZATION
 
 - **Directory structure and file organization**:  
   The codebase is organized into several main directories:
-  - **backend/**: Contains the backend application code, including models, routes, utilities, and configuration files.
-  - **frontend/**: Contains the frontend application code, including components, pages, and styles.
-  - **helm/**: Contains Helm charts for deploying the application on Kubernetes.
-  - **terraform/**: Contains Terraform scripts for infrastructure management.
+  - `backend/`: Contains the backend code, including models, routes, and utilities.
+  - `frontend/`: Contains the frontend code, including components and pages.
+  - `helm/`: Contains Helm charts for Kubernetes deployment.
+  - `terraform/`: Contains Terraform scripts for infrastructure management.
 
 - **Key modules and their purposes**:  
-  - **models/**: Defines data models for the application.
-  - **routes/**: Contains API route definitions and service logic.
-  - **utils/**: Provides utility functions for authentication, database access, and other common tasks.
-  - **components/**: Contains reusable UI components for the frontend.
+  - **Models**: Define the data structures used in the application (e.g., `user.py`, `chat_message.py`).
+  - **Routes**: Handle API endpoints (e.g., `router.py` for chat sessions).
+  - **Utils**: Provide utility functions for authentication and database access.
 
 - **Configuration management approach**:  
-  Configuration is managed using environment variables and configuration files (e.g., `.env`, `Dockerfile`, `docker-compose.yml`). Sensitive information is stored in Google Cloud Secret Manager.
+  Configuration is managed through environment variables and configuration files (e.g., `.env.example`, `alembic.ini`). Helm charts are used for managing deployment configurations in Kubernetes.
 
 - **Resource locations (assets, templates, etc.)**:  
-  Static assets (e.g., images) are stored in the `public/` directory of the frontend. Templates and markdown files for system prompts are located in the `system_prompts/` directory.
+  Static assets (e.g., images) are stored in the `public/` directory of the frontend. Templates and markdown files for system prompts are located in `backend/system_prompts/`.
 
 ## 4. CORE FUNCTIONALITY
 
 - **Main features and capabilities**:  
-  - Chat functionality with the AI assistant.
-  - Integration with external APIs for retrieving data (e.g., GitHub repository information, weather data).
-  - Scheduling meetings through Calendly.
+  - AI-driven chat interactions.
+  - User authentication and session management.
+  - Integration with external APIs (e.g., GitHub, Calendly, weather data).
 
 - **Critical business logic and algorithms**:  
-  The backend implements business logic for managing chat sessions, including user creation, session tracking, and message storage. Algorithms for processing user input and generating responses are based on AI models from LangChain.
+  - The backend implements logic for managing chat sessions, including creating new sessions and handling message storage.
+  - AI responses are generated using LangChain, which integrates with OpenAI's models.
 
 - **Error handling and logging approach**:  
-  The application includes error handling mechanisms using FastAPI's exception handling. Errors are logged to the console for debugging purposes, and user-friendly error messages are returned in API responses.
+  The system employs try-catch blocks to handle exceptions gracefully, returning appropriate HTTP status codes. Logging is done using print statements for debugging, but a more robust logging framework could be implemented.
 
 - **Performance optimization techniques**:  
-  - Caching mechanisms are implemented for frequently accessed data.
-  - Asynchronous programming is utilized in FastAPI to handle concurrent requests efficiently.
+  - Asynchronous programming is used to handle multiple requests concurrently.
+  - Caching mechanisms could be implemented for frequently accessed data to reduce database load.
 
 ## 5. INTEGRATION POINTS
 
 - **External service dependencies**:  
-  - **GitHub API**: For fetching repository information.
-  - **Weather API**: For retrieving current weather data.
-  - **Calendly API**: For scheduling meetings.
+  - **OpenAI**: For generating AI responses.
+  - **Clerk**: For user authentication.
+  - **Google Cloud**: For database and secret management.
 
 - **API endpoints (both consumed and exposed)**:  
-  - **Exposed Endpoints**:
-    - `/chat-session`: Manages chat sessions.
-    - `/chat`: Handles chat interactions with the AI assistant.
-  - **Consumed Endpoints**:
-    - GitHub API for repository data.
-    - Weather API for current weather data.
+  - Exposed endpoints for chat sessions and user authentication.
+  - Consumed endpoints from external services like GitHub and weather APIs.
 
 - **Message queues or event systems**:  
-  The system does not currently implement message queues but could benefit from integrating a message broker for handling asynchronous tasks in the future.
+  Currently, the system does not utilize message queues but could benefit from implementing one for handling asynchronous tasks.
 
 - **Caching mechanisms**:  
-  Caching is implemented for API responses to reduce latency and improve performance.
+  Caching could be implemented using in-memory stores like Redis to improve response times for frequently requested data.
 
 ## 6. DEVELOPMENT WORKFLOW
 
 - **Testing approach and framework usage**:  
-  The codebase employs unit testing and integration testing using frameworks like **pytest**. Tests are organized in a dedicated `tests/` directory.
+  The codebase does not currently include a dedicated testing framework. Implementing unit tests using **pytest** or **unittest** would be beneficial.
 
 - **Development environment setup**:  
-  Developers can set up the environment by cloning the repository, installing dependencies via `poetry` or `npm`, and configuring environment variables as specified in the `.env.example` file.
+  Developers can set up the environment by installing dependencies listed in `requirements.txt` and using Docker for containerization.
 
 - **Common development tasks and commands**:  
-  - Start the backend: `uvicorn gen_ui_backend.server:app --reload`
-  - Start the frontend: `npm run dev`
-  - Run tests: `pytest`
+  - `docker-compose up` to start the application.
+  - `npm run dev` to run the frontend in development mode.
 
 - **Known limitations or technical debt**:  
-  - The application could benefit from improved documentation, particularly for API endpoints and integration points.
-  - Some components may require refactoring to adhere to best practices in code organization and modularity.
+  - Lack of comprehensive tests.
+  - Basic logging implementation that could be improved for better observability.
+  - Potential for refactoring to improve code organization and modularity.
 
 ---
 
