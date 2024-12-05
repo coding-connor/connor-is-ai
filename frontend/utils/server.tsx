@@ -5,7 +5,6 @@ import { Runnable } from "@langchain/core/runnables";
 import { CompiledStateGraph } from "@langchain/langgraph";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
-import { json } from "stream/consumers";
 
 export const LAMBDA_STREAM_WRAPPER_NAME = "lambda_stream_wrapper";
 

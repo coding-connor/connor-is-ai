@@ -1,0 +1,244 @@
+Here's a comprehensive code skeleton that captures the system architecture of the provided codebase, focusing on the structural hierarchy, backend and frontend components, integration points, and overall organization.
+
+### 1. STRUCTURAL HIERARCHY
+
+#### Backend
+```python
+# Core interfaces and protocols
+from typing import Protocol, Any
+
+class BaseService(Protocol):
+    """Define core service behavior."""
+    async def process(self) -> None:
+        pass
+
+# Abstract base classes
+class BaseModel:
+    """Base class for all models."""
+    pass
+
+# Key service definitions
+class UserService(BaseService):
+    """User management operations."""
+    async def get_user(self, id: str) -> Any:
+        pass
+
+class ChatService(BaseService):
+    """Chat session management operations."""
+    async def create_session(self, user_id: str) -> Any:
+        pass
+
+# Type definitions and data models
+from sqlmodel import Field, SQLModel
+import uuid
+from datetime import datetime
+
+class User(BaseModel, table=True):
+    user_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    email: str
+
+class ChatSession(BaseModel, table=True):
+    session_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.user_id")
+    started_at: datetime
+    ended_at: datetime
+
+# Component hierarchies
+# - UserService
+#   - User
+# - ChatService
+#   - ChatSession
+
+# Integration points
+# - Database: PostgreSQL
+# - External APIs: OpenAI, GitHub, Weather API
+```
+
+### 2. BACKEND SKELETON
+
+```python
+# Data models and their relationships
+class ChatMessage(BaseModel, table=True):
+    message_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    session_id: uuid.UUID = Field(foreign_key="chatsession.session_id")
+    sender: str
+    content: str
+    timestamp: datetime
+
+# Service layer interfaces and key methods
+class ChatService(BaseService):
+    async def send_message(self, session_id: str, content: str) -> ChatMessage:
+        pass
+
+# External integrations and tool abstractions
+class GithubIntegration:
+    async def fetch_repo_info(self, owner: str, repo: str) -> Any:
+        pass
+
+class WeatherIntegration:
+    async def get_weather(self, city: str, state: str) -> Any:
+        pass
+
+# API endpoint definitions
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.post("/chat/session")
+async def create_chat_session(user_id: str):
+    pass
+
+@router.post("/chat/message")
+async def send_chat_message(session_id: str, content: str):
+    pass
+
+# Authentication and middleware structures
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Utility and helper interfaces
+class DatabaseHelper:
+    async def get_session(self):
+        pass
+```
+
+### 3. FRONTEND SKELETON
+
+```typescript
+// TypeScript interfaces and types
+interface User {
+    id: string;
+    email: string;
+}
+
+interface ChatMessage {
+    messageId: string;
+    sessionId: string;
+    sender: string;
+    content: string;
+    timestamp: string;
+}
+
+// React component hierarchies
+import React from "react";
+
+const Chat: React.FC = () => {
+    return <div>{/* Chat UI */}</div>;
+};
+
+const UserProfile: React.FC<{ user: User }> = ({ user }) => {
+    return <div>{user.email}</div>;
+};
+
+// Custom hooks and their signatures
+import { useState, useEffect } from "react";
+
+function useChatSession(userId: string) {
+    const [sessionId, setSessionId] = useState<string | null>(null);
+    useEffect(() => {
+        // Fetch session ID logic
+    }, [userId]);
+    return sessionId;
+}
+
+// State management structures
+import { createContext, useContext } from "react";
+
+const ChatContext = createContext<{ messages: ChatMessage[] }>({ messages: [] });
+
+// API client interfaces
+async function fetchChatMessages(sessionId: string): Promise<ChatMessage[]> {
+    const response = await fetch(`/api/chat/session/${sessionId}`);
+    return response.json();
+}
+
+// Utility functions
+function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+}
+```
+
+### 4. INTEGRATION POINTS
+
+```python
+# External service interfaces
+class OpenAIService:
+    async def generate_response(self, prompt: str) -> str:
+        pass
+
+class GithubService:
+    async def get_repo_info(self, owner: str, repo: str) -> dict:
+        pass
+
+# API contracts between frontend and backend
+# - POST /chat/session
+# - POST /chat/message
+
+# Event and message definitions
+class ChatEvent:
+    def __init__(self, type: str, data: dict):
+        self.type = type
+        self.data = data
+
+# Third-party tool integrations
+# - Calendly for scheduling
+# - GitHub API for repository information
+# - Weather API for weather data
+
+# Authentication flows
+# - JWT authentication for API access
+```
+
+### 5. CODE ORGANIZATION
+
+```
+src/
+  ├── backend/       # Backend services
+      ├── models/    # Data models
+      ├── services/  # Business logic services
+      ├── routes/    # API routes
+      ├── utils/     # Utility functions
+  ├── frontend/      # Frontend components
+      ├── components/ # UI components
+      ├── hooks/      # Custom hooks
+      ├── pages/      # Next.js pages
+  └── shared/        # Shared utilities and types
+```
+
+### 6. FORMATTING GUIDELINES
+
+- Use proper type hints and generics.
+- Include docstrings for major components.
+- Show async/await patterns where applicable.
+- Define clear interface boundaries.
+- Include important decorators.
+- Show dependency injection patterns.
+- Maintain consistent indentation.
+
+### 7. WHAT TO EXCLUDE
+
+- Implementation details.
+- Complex business logic.
+- Configuration values.
+- Inline comments (use docstrings instead).
+- Test code.
+- Documentation comments.
+
+### 8. SPECIAL CONSIDERATIONS
+
+- Show both synchronous and asynchronous patterns.
+- Include error handling interfaces.
+- Show generic type constraints.
+- Define event emitters and handlers.
+- Show dependency injection patterns.
+- Include middleware chains.
+
+This skeleton provides a structured overview of the system architecture, focusing on the essential components and their relationships while omitting implementation details.

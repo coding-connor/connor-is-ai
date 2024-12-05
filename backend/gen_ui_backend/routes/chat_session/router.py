@@ -13,7 +13,7 @@ from gen_ui_backend.routes.chat_session.service import (
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("")
 async def chat_session_endpoint(
     db: Session = Depends(get_db_session),
     user_email: str = Depends(auth_dependency),

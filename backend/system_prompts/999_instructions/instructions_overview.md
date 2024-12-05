@@ -291,5 +291,3 @@ Responses should never:
 - Project Details: "While I worked on similar projects, I'd need to confirm the specific details you're asking about."
 
 ## Background Information
-
-Omitted from Github :) Chat with me and see what you can figure out!

@@ -1,5 +1,7 @@
 # System Prompt
-system_prompt/
+backend/system_prompts/*
+!backend/system_prompts/prompt_upload.py
+!backend/system_prompts/999_instructions/
 backend/repopack/connor_is_ai_full.txt
 
 # Node.js

@@ -1,3 +1,4 @@
+from gen_ui_backend.utils.storage_service import FileReaderService
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableConfig
@@ -14,8 +15,12 @@ from gen_ui_backend.tools.github import github_repo
 from gen_ui_backend.tools.weather import weather_data
 from functools import lru_cache
 
+BASE_DIR = os.environ.get("BASE_DIR", "system_prompts")
+FILE_NAME = "system_prompt.txt"
 
-# This is critical for frontend deserialization
+
+# TODO make this a Pydantic class or something more elegant
+# This is critical for frontend deserialization. It gets pretty low-level into the langchain implementation to find out why, but the tl;dr is that the message returned populates the event streamed to the frontend, and the frontend deserialization expects that the message property of this event is an array.
 def ensure_array(result):
     """Wrap non-array results in an array."""
     return [result] if not isinstance(result, list) else result
@@ -23,38 +28,13 @@ def ensure_array(result):
 
 # TODO Replace with LangChain Loader
 @lru_cache(maxsize=1)
-def read_markdown_files(directory):
-    content = ""
-    files_to_read = []
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".md") or file.endswith(".txt"):
-                files_to_read.append(os.path.join(root, file))
-
-    for file_path in sorted(files_to_read):
-        with open(file_path, "r") as f:
-            file_content = f.read()
-            if file_path.endswith(".txt"):
-                # Escape curly braces
-                file_content = file_content.replace("{", "{{").replace("}", "}}")
-            content += file_content + "\n\n"
-
-    # print(content)
-    return content
-
-
-# class MessagesState(TypedDict, total=False):
-#     input: HumanMessage
-#     result: Optional[str]
-#     """Plain text response if no tool was used."""
-#     tool_calls: Optional[List[dict]]
-#     """A list of parsed tool calls."""
-#     tool_result: Optional[dict]
-#     """The result of a tool call."""
+def read_prompt(file_name: str) -> str:
+    file_reader = FileReaderService(BASE_DIR)
+    return file_reader.read_file(file_name)
 
 
 def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
-    system_prompt = read_markdown_files("gen_ui_backend/system_prompt")
+    system_prompt = read_prompt("gen_ui_backend/system_prompt")
 
     initial_prompt = ChatPromptTemplate.from_messages(
         [

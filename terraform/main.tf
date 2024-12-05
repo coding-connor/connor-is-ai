@@ -61,6 +61,12 @@ resource "google_container_cluster" "primary" {
 
 }
 
+resource "google_storage_bucket" "prompts" {
+  name     = "system_prompts"
+  location = var.region
+  uniform_bucket_level_access = true
+}
+
 # Artifact Registry
 resource "google_artifact_registry_repository" "docker_repo" {
   location      = var.region
