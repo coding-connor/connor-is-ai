@@ -3,7 +3,7 @@
 ## 1. OVERVIEW
 
 - **High-level purpose and main functionality of the system**:  
-  The system is designed to serve as a generative AI assistant, enabling users to interact with an AI representation of Connor Haines, a software engineer. It provides functionalities such as scheduling meetings, retrieving GitHub repository information, and fetching weather data, all through a conversational interface.
+  The system serves as a generative AI assistant, enabling users to interact with an AI representation of Connor Haines, a software engineer. It provides functionalities such as scheduling meetings, retrieving GitHub repository information, and fetching weather data through a conversational interface.
 
 - **Target users and use cases**:  
   The primary users are individuals or organizations interested in AI technologies, software engineering, and scheduling meetings with Connor Haines. Use cases include:

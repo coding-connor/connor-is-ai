@@ -38,7 +38,7 @@ type ToolComponentMap = {
 
 type ToolState = {
   selectedToolComponent: ToolComponent | null;
-  selectedToolUI: ReturnType<typeof createStreamableUI> | null;
+  selectedToolUI: JSX.Element | null;
 };
 
 type EventHandler = (event: StreamEvent, ...args: any[]) => void;
@@ -96,19 +96,11 @@ async function agent(inputs: { input: string; thread_id: string }) {
     fields: EventHandlerFields,
     toolState: ToolState,
   ) => {
-    console.log("handleToolsStartEvent State:", {
-      hasToolUI: !!toolState.selectedToolUI,
-      hasToolComponent: !!toolState.selectedToolComponent,
-      eventData: event.data,
-    });
     const toolCall = event.name;
     if (!toolState.selectedToolComponent && !toolState.selectedToolUI) {
-      console.log("adding tool state");
       toolState.selectedToolComponent = TOOL_COMPONENT_MAP[toolCall];
-      toolState.selectedToolUI = createStreamableUI(
-        toolState.selectedToolComponent.loading(),
-      );
-      fields.ui.append(toolState.selectedToolUI?.value);
+      toolState.selectedToolUI = toolState.selectedToolComponent.loading();
+      fields.ui.update(toolState.selectedToolUI);
     }
   };
 
@@ -117,38 +109,22 @@ async function agent(inputs: { input: string; thread_id: string }) {
     fields: EventHandlerFields,
     toolState: ToolState,
   ) => {
-    console.log("handleToolsEndEvent State:", {
-      hasToolUI: !!toolState.selectedToolUI,
-      hasToolComponent: !!toolState.selectedToolComponent,
-      eventData: event.data,
-    });
     if (!toolState.selectedToolUI || !toolState.selectedToolComponent) {
       console.warn("Missing tool state in handleToolsEndEvent");
-
       return;
     }
 
     const toolData = event.data.output;
 
-    try {
-      if (toolData.error && toolState.selectedToolComponent.error) {
-        console.log("Rendering error component:", toolData.error);
-        toolState.selectedToolUI.done(
-          toolState.selectedToolComponent.error(toolData),
-        );
-      } else {
-        console.log("Rendering final component with data:", toolData);
-        toolState.selectedToolUI.done(
-          toolState.selectedToolComponent.final(toolData),
-        );
-      }
-    } catch (e) {
-      console.error("Error in handleToolsEndEvent:", e);
+    if (toolData.error && toolState.selectedToolComponent.error) {
+      toolState.selectedToolUI =
+        toolState.selectedToolComponent.error(toolData);
+      fields.ui.update(toolState.selectedToolUI);
+    } else {
+      const component = toolState.selectedToolComponent.final(toolData);
+      toolState.selectedToolUI = component;
+      fields.ui.update(toolState.selectedToolUI);
     }
-
-    console.log("Clearing tool state");
-    toolState.selectedToolComponent = null;
-    toolState.selectedToolUI = null;
   };
 
   const handleChatModelStreamEvent: EventHandler = (
@@ -171,26 +147,15 @@ async function agent(inputs: { input: string; thread_id: string }) {
     fields: EventHandlerFields,
   ) => {
     if (isToolStartEvent(event)) {
-      console.log("Tool Start:", {
-        tool: event.name,
-        data: event.data,
-      });
       handleToolStartEventt(event, fields, toolState);
     }
     if (IsToolsEndEvent(event)) {
-      console.log("Tool End:", {
-        tool: event.name,
-        output: event.data.output,
-        error: event.data.output?.error,
-      });
       handleToolsEndEvent(event, fields, toolState);
     }
     if (isChatModelStreamEvent(event)) {
       handleChatModelStreamEvent(event, fields);
     }
   };
-
-  console.log("Inputs:", inputs);
 
   return streamRunnableUI(
     remoteRunnable,
