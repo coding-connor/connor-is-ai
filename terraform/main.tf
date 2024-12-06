@@ -59,6 +59,9 @@ resource "google_container_cluster" "primary" {
   location       = var.region
   enable_autopilot = true
 
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
 }
 
 resource "google_storage_bucket" "prompts" {
@@ -124,6 +127,36 @@ resource "google_secret_manager_secret" "app_secrets" {
   replication {
     auto {}
   }
+}
+
+# GKE Service Account
+resource "google_service_account" "gcs_access" {
+  account_id   = "gcs-access-sa"
+  display_name = "GCS Access Service Account"
+}
+
+resource "google_storage_bucket_iam_member" "bucket_access" {
+  bucket = google_storage_bucket.prompts.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.gcs_access.email}"
+}
+
+resource "kubernetes_service_account" "workload_identity" {
+  metadata {
+    name = "gcs-access-ksa"
+    namespace = "default"
+    annotations = {
+      "iam.gke.io/gcp-service-account" = google_service_account.gcs_access.email
+    }
+  }
+}
+
+resource "google_service_account_iam_binding" "workload_identity" {
+  service_account_id = google_service_account.gcs_access.name
+  role               = "roles/iam.workloadIdentityUser"
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[default/gcs-access-ksa]"
+  ]
 }
 
 # DNS Zone

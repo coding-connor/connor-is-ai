@@ -27,3 +27,6 @@ backend:
     langchain:
       tracingV2: true
       endpoint: https://api.smith.langchain.com
+serviceAccount:
+  name: gcs-access-ksa
+  namespace: default
