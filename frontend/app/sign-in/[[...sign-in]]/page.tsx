@@ -9,6 +9,7 @@ import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ERROR_USER_ALREADY_EXISTS = "form_identifier_exists";
+const ERROR_INCORRECT_CODE = "form_code_incorrect";
 
 export default function Page() {
   const {
@@ -28,7 +29,10 @@ export default function Page() {
   const [code, setCode] = React.useState("");
   const router = useRouter();
 
+  const [error, setError] = React.useState<string | null>(null);
+
   async function handleSignUp(e: React.FormEvent) {
+    setError(null);
     e.preventDefault();
 
     if (!isLoadedSignUp && !signUp) return null;
@@ -47,15 +51,16 @@ export default function Page() {
         if (errorCode === ERROR_USER_ALREADY_EXISTS) {
           handleSignIn(e);
         } else {
-          console.error("Error:", JSON.stringify(err, null, 2));
+          setError("Sorry, an unexpected error occurred.");
         }
       } else {
-        console.error("Unexpected error:", JSON.stringify(err, null, 2));
+        setError("Sorry, an unexpected error occurred.");
       }
     }
   }
 
   async function handleSignUpVerification(e: React.FormEvent) {
+    setError(null);
     e.preventDefault();
 
     if (!isLoadedSignUp && !signUp) return null;
@@ -70,10 +75,21 @@ export default function Page() {
 
         router.push("/");
       } else {
-        console.error(signInAttempt);
+        setError("Sorry, an unexpected error occurred.");
       }
-    } catch (err) {
-      console.error("Error:", JSON.stringify(err, null, 2));
+    } catch (err: any) {
+      if (err.errors && err.errors.length > 0) {
+        const errorCode = err.errors[0].code;
+        if (errorCode === ERROR_INCORRECT_CODE) {
+          setError(
+            "Wrong code. Refresh the page if you need to resend the code.",
+          );
+        } else {
+          setError("Sorry, an unexpected error occurred.");
+        }
+      } else {
+        setError("Sorry, an unexpected error occurred.");
+      }
     }
   }
 
@@ -88,7 +104,7 @@ export default function Page() {
       });
 
       const isEmailCodeFactor = (
-        factor: SignInFirstFactor
+        factor: SignInFirstFactor,
       ): factor is EmailCodeFactor => {
         return factor.strategy === "email_code";
       };
@@ -105,7 +121,7 @@ export default function Page() {
         setVerifyingSignIn(true);
       }
     } catch (err) {
-      console.error("Error:", JSON.stringify(err, null, 2));
+      setError("Sorry, an unexpected error occurred.");
     }
   }
 
@@ -125,10 +141,21 @@ export default function Page() {
 
         router.push("/");
       } else {
-        console.error(signInAttempt);
+        setError("Sorry, an unexpected error occurred.");
       }
-    } catch (err) {
-      console.error("Error:", JSON.stringify(err, null, 2));
+    } catch (err: any) {
+      if (err.errors && err.errors.length > 0) {
+        const errorCode = err.errors[0].code;
+        if (errorCode === ERROR_INCORRECT_CODE) {
+          setError(
+            "Wrong code. Refresh the page if you need to resend the code.",
+          );
+        } else {
+          setError("Sorry, an unexpected error occurred.");
+        }
+      } else {
+        setError("Sorry, an unexpected error occurred.");
+      }
     }
   }
 
@@ -155,6 +182,7 @@ export default function Page() {
             >
               Verify
             </button>
+            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
           </form>
         </div>
       </div>
@@ -184,6 +212,7 @@ export default function Page() {
             >
               Verify
             </button>
+            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
           </form>
         </div>
       </div>
@@ -248,6 +277,7 @@ export default function Page() {
           >
             Submit
           </button>
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
         </form>
       </div>
     </div>
