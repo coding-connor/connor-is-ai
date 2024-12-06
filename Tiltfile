@@ -6,7 +6,16 @@ load('ext://restart_process', 'docker_build_with_restart')
 config.define_string(name="build_mode", args=False, usage="Mode to build frontend: dev or prod")
 cfg = config.parse()
 
-# Backend live updates
+# TODO Auth to GCP to read the system prompt instead 
+local_resource(
+    'copy-system-prompt',
+    '''
+    kubectl exec $(kubectl get pods -l app=connor-backend -o jsonpath="{.items[0].metadata.name}") -- mkdir -p /app/system_prompts && \
+    kubectl cp backend/system_prompts/aggregated_system_prompt.txt $(kubectl get pods -l app=connor-backend -o jsonpath="{.items[0].metadata.name}"):/app/system_prompts/aggregated_system_prompt.txt
+    ''',
+    resource_deps=['connor-backend']
+)
+
 docker_build_with_restart(
     'connor-backend',
     './backend',

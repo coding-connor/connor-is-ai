@@ -16,7 +16,7 @@ from gen_ui_backend.tools.weather import weather_data
 from functools import lru_cache
 
 BASE_DIR = os.environ.get("BASE_DIR", "system_prompts")
-FILE_NAME = "system_prompt.txt"
+PROMPT_FILE_NAME = "aggregated_system_prompt.txt"
 
 
 # TODO make this a Pydantic class or something more elegant
@@ -34,7 +34,7 @@ def read_prompt(file_name: str) -> str:
 
 
 def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
-    system_prompt = read_prompt("gen_ui_backend/system_prompt")
+    system_prompt = read_prompt(PROMPT_FILE_NAME)
 
     initial_prompt = ChatPromptTemplate.from_messages(
         [

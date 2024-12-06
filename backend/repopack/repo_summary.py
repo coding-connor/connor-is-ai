@@ -5,10 +5,10 @@ from typing import Optional
 
 REPOPACK_OUTPUT_PATH = "repopack/connor_is_ai_full.txt"
 SUMMARY_OUTPUT_PATH = (
-    "gen_ui_backend/system_prompt/0_long_context_documents/connor_is_ai_summary.txt"
+    "gen_ui_backend/system_prompts/0_long_context_documents/connor_is_ai_summary.txt"
 )
 SKELETON_OUTPUT_PATH = (
-    "gen_ui_backend/system_prompt/0_long_context_documents/connor_is_ai_skeleton.txt"
+    "gen_ui_backend/system_prompts/0_long_context_documents/connor_is_ai_skeleton.txt"
 )
 
 SUMMARY_INSTRUCTIONS = (

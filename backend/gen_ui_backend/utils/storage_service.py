@@ -1,6 +1,6 @@
 from typing import Protocol
-import os
 from google.cloud import storage
+import os
 
 
 class FileReader(Protocol):

@@ -1,4 +1,4 @@
-Here's a comprehensive code skeleton that captures the system architecture of the provided codebase, focusing on the structural hierarchy, backend and frontend components, integration points, and code organization.
+Here's a comprehensive code skeleton that captures the system architecture of the provided codebase, focusing on the structural hierarchy, backend and frontend components, integration points, and overall organization.
 
 ### 1. STRUCTURAL HIERARCHY
 
@@ -29,13 +29,19 @@ class ChatService(BaseService):
         pass
 
 # Type definitions and data models
-class User(BaseModel):
-    user_id: str
+from sqlmodel import Field, SQLModel
+import uuid
+from datetime import datetime
+
+class User(BaseModel, table=True):
+    user_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     email: str
 
-class ChatSession(BaseModel):
-    session_id: str
-    user_id: str
+class ChatSession(BaseModel, table=True):
+    session_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID
+    started_at: datetime
+    ended_at: datetime
 
 # Component hierarchies
 # - UserService
@@ -54,35 +60,38 @@ interface User {
     email: string;
 }
 
-interface ChatMessage {
-    sender: 'user' | 'bot';
-    content: string;
-    timestamp: Date;
+interface ChatSession {
+    sessionId: string;
+    userId: string;
+    startedAt: Date;
+    endedAt?: Date;
 }
 
 // React component hierarchies
-function ChatComponent() {
-    // Component logic
-}
+import React from "react";
 
-function UserComponent() {
-    // Component logic
-}
+const ChatComponent: React.FC<{ session: ChatSession }> = ({ session }) => {
+    return <div>{session.sessionId}</div>;
+};
 
 // Custom hooks and their signatures
+import { useState } from "react";
+
 function useChat() {
-    // Hook logic
+    const [messages, setMessages] = useState<string[]>([]);
+    const sendMessage = (message: string) => {
+        setMessages((prev) => [...prev, message]);
+    };
+    return { messages, sendMessage };
 }
 
 // State management structures
-const chatState = {
-    messages: [] as ChatMessage[],
-    currentUser: null as User | null,
-};
+// Using React's useState and useContext for state management
 
 // API client interfaces
-async function fetchUser(userId: string): Promise<User> {
-    // Fetch user logic
+async function fetchChatSession(userId: string): Promise<ChatSession> {
+    const response = await fetch(`/api/chat-session/${userId}`);
+    return response.json();
 }
 
 // Utility functions
@@ -95,45 +104,34 @@ function formatDate(date: Date): string {
 
 ```python
 # Data models and their relationships
-class User(BaseModel):
-    user_id: uuid.UUID
-    email: str
-    sessions: List[ChatSession]  # One-to-many relationship
-
-class ChatSession(BaseModel):
+class ChatMessage(BaseModel, table=True):
+    message_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     session_id: uuid.UUID
-    user_id: uuid.UUID
-    messages: List[ChatMessage]  # One-to-many relationship
+    sender: str
+    content: str
+    timestamp: datetime
 
 # Service layer interfaces and key methods
-class UserService(BaseService):
-    async def get_user(self, id: str) -> User:
-        pass
-
 class ChatService(BaseService):
-    async def create_session(self, user_id: str) -> ChatSession:
+    async def add_message(self, session_id: str, message: ChatMessage) -> None:
         pass
 
 # External integrations and tool abstractions
-class GithubIntegration:
-    async def fetch_repo_info(self, owner: str, repo: str) -> dict:
-        pass
-
-class WeatherIntegration:
-    async def get_weather(self, city: str, state: str) -> dict:
-        pass
+# - OpenAI API for chat responses
+# - GitHub API for repository data
+# - Weather API for weather data
 
 # API endpoint definitions
 from fastapi import APIRouter
 
 router = APIRouter()
 
-@router.post("/chat-session")
+@router.post("/chat")
 async def create_chat_session(user_id: str):
     pass
 
-@router.get("/user/{user_id}")
-async def get_user(user_id: str):
+@router.post("/chat/message")
+async def add_chat_message(session_id: str, message: ChatMessage):
     pass
 
 # Authentication and middleware structures
@@ -156,45 +154,38 @@ def get_db_session():
 
 ```typescript
 // TypeScript interfaces and types
-interface User {
-    id: string;
-    email: string;
-}
-
 interface ChatMessage {
-    sender: 'user' | 'bot';
+    id: string;
     content: string;
-    timestamp: Date;
+    sender: "user" | "bot";
 }
 
 // React component hierarchies
-function ChatComponent() {
-    // Component logic
-}
-
-function UserComponent() {
-    // Component logic
-}
+const Chat: React.FC = () => {
+    return <div>Chat Component</div>;
+};
 
 // Custom hooks and their signatures
 function useChat() {
-    // Hook logic
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const sendMessage = (message: ChatMessage) => {
+        setMessages((prev) => [...prev, message]);
+    };
+    return { messages, sendMessage };
 }
 
 // State management structures
-const chatState = {
-    messages: [] as ChatMessage[],
-    currentUser: null as User | null,
-};
+// Using React's useState and useContext for state management
 
 // API client interfaces
-async function fetchUser(userId: string): Promise<User> {
-    // Fetch user logic
+async function fetchChatMessages(sessionId: string): Promise<ChatMessage[]> {
+    const response = await fetch(`/api/chat/${sessionId}`);
+    return response.json();
 }
 
 // Utility functions
-function formatDate(date: Date): string {
-    return date.toLocaleString();
+function formatMessage(message: ChatMessage): string {
+    return `${message.sender}: ${message.content}`;
 }
 ```
 
@@ -202,39 +193,23 @@ function formatDate(date: Date): string {
 
 ```python
 # External service interfaces
-class GithubIntegration:
-    async def fetch_repo_info(self, owner: str, repo: str) -> dict:
-        pass
-
-class WeatherIntegration:
-    async def get_weather(self, city: str, state: str) -> dict:
-        pass
+# - OpenAI for chat responses
+# - GitHub for repository data
+# - Weather API for weather data
 
 # API contracts between frontend and backend
-// Example API contract for fetching user
-async function fetchUser(userId: string): Promise<User> {
-    const response = await fetch(`/api/user/${userId}`);
-    return await response.json();
-}
+# - POST /chat-session to create a new chat session
+# - POST /chat/message to add a new message to a session
 
-// Event and message definitions
-interface ChatEvent {
-    type: 'message' | 'error';
-    payload: ChatMessage | string;
-}
+# Event and message definitions
+# - ChatMessage structure for messages exchanged in chat
 
-// Third-party tool integrations
-// Integration with OpenAI for chat responses
-class OpenAIIntegration {
-    async getResponse(prompt: string): Promise<string> {
-        // Call OpenAI API
-    }
-}
+# Third-party tool integrations
+# - Calendly for scheduling meetings
+# - GitHub for fetching repository data
 
-// Authentication flows
-async function authenticateUser(email: string, password: string): Promise<User> {
-    // Authentication logic
-}
+# Authentication flows
+# - Clerk for user authentication
 ```
 
 ### 5. CODE ORGANIZATION
@@ -243,11 +218,11 @@ async function authenticateUser(email: string, password: string): Promise<User> 
 src/
   ├── backend/       # Backend services
       ├── models/    # Data models
-      ├── services/  # Business services
+      ├── services/  # Business logic services
       ├── routes/    # API routes
       ├── utils/     # Utility functions
   ├── frontend/      # Frontend components
-      ├── components/ # React components
+      ├── components/ # Reusable components
       ├── hooks/      # Custom hooks
       ├── pages/      # Next.js pages
   └── shared/        # Shared utilities and types
