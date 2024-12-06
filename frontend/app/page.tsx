@@ -12,6 +12,7 @@ export default function Home() {
       <Button
         variant="outline"
         className="absolute top-4 left-4 flex items-center px-3 py-1"
+        asChild
       >
         <SignOutButton> Logout </SignOutButton>
       </Button>
@@ -22,7 +23,7 @@ export default function Home() {
           alt="Avatar Logo"
           width={200}
           height={200}
-          className="mx-auto"
+          className="mx-auto w-[80px] h-[80px] sm:w-[200px] sm:h-[200px]"
           priority={true}
         />
         <p className="text-[16px] text-center font-medium">

@@ -40,7 +40,7 @@ export default function Chat() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -70,7 +70,7 @@ export default function Chat() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (!response.ok) {
         throw new Error("Failed to end session");
@@ -100,7 +100,7 @@ export default function Chat() {
         <div className="flex flex-col gap-1 w-full max-w-fit mr-auto">
           {element.ui}
         </div>
-      </div>
+      </div>,
     );
 
     setElements(newElements);
@@ -112,11 +112,16 @@ export default function Chat() {
       <div className="w-full h-[calc(100vh-395px)] overflow-y-scroll flex flex-col gap-4 mx-auto mb-2 border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
         <Button
           onClick={newSession}
-          className="absolute top-4 right-4 flex items-center px-3 py-1"
+          className="absolute top-4 right-4 flex items-center px-3 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm"
           variant={"default"}
+          size="sm"
         >
-          <FontAwesomeIcon icon={faPlusCircle} className="h-4 w-4 mr-1" />
-          New Chat
+          <FontAwesomeIcon
+            icon={faPlusCircle}
+            className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
+          />
+          <span className="hidden sm:inline">New Chat</span>
+          <span className="sm:hidden">New</span>
         </Button>
         <Greeting></Greeting>
         <LocalContext.Provider value={onSubmit}>
@@ -142,6 +147,9 @@ export default function Chat() {
       </div>
       <div className="text-center text-xs mt-2 text-gray-400">
         AI makes mistakes. Check important info.{" "}
+        <span className="hidden sm:inline">
+          (Ideally by interviewing Connor)
+        </span>
       </div>
     </div>
   );
