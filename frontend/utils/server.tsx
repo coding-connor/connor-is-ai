@@ -63,7 +63,6 @@ export function streamRunnableUI<RunInput, RunOutput>(
             "invoke_tools_or_return",
             "RunnableSequence",
             "LangGraph",
-            "/chat",
             "__start__",
             "ChatPromptTemplate",
             "JsonOutputToolsParser",

@@ -8,7 +8,7 @@ export function Greeting(): JSX.Element {
       <ul className="list-none list-inside">
         <li className="mb-2">
           🤝 Ask me questions as if you are conducting a screening interview
-          with Connor. Get creative!
+          with Connor.
         </li>
         <li className="mb-2">
           💻 Try asking me about my work history as a software engineer.

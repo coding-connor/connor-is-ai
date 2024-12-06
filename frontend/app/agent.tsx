@@ -23,6 +23,7 @@ import {
 import { cookies } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthToken } from "@/utils/server-token";
+import { AIMessageText, Loading, LoadingMessage } from "@/components/chat/message";
 
 const API_URL = `${process.env.K8S_BACKEND_URL}/chat`;
 
@@ -60,6 +61,10 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   },
 };
 
+function isChainStartEvent(event: StreamEvent): boolean {
+  return event.event === "on_chain_start" && event.name === "/chat";
+}
+
 function isToolStartEvent(event: StreamEvent): boolean {
   return event.event === "on_tool_start" && event.name in TOOL_COMPONENT_MAP;
 }
@@ -89,6 +94,15 @@ async function agent(inputs: { input: string; thread_id: string }) {
   const toolState: ToolState = {
     selectedToolComponent: null,
     selectedToolUI: null,
+  };
+
+  const handleChainStartEvent: EventHandler = (
+    event: StreamEvent,
+    fields: EventHandlerFields,
+  ) => {
+    fields.ui.append(
+      <LoadingMessage />
+    );
   };
 
   const handleToolStartEventt: EventHandler = (
@@ -133,7 +147,7 @@ async function agent(inputs: { input: string; thread_id: string }) {
   ) => {
     if (!fields.callbacks[event.run_id]) {
       const textStream = createStreamableValue();
-      fields.ui.append(<AIMessage value={textStream.value} />);
+      fields.ui.update(<AIMessage value={textStream.value} />);
       fields.callbacks[event.run_id] = textStream;
     }
 
@@ -146,6 +160,9 @@ async function agent(inputs: { input: string; thread_id: string }) {
     event: StreamEvent,
     fields: EventHandlerFields,
   ) => {
+    if (isChainStartEvent(event)) {
+      handleChainStartEvent(event, fields);
+    }
     if (isToolStartEvent(event)) {
       handleToolStartEventt(event, fields, toolState);
     }

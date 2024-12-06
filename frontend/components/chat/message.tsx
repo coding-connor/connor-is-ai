@@ -1,6 +1,7 @@
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import remarkGfm from "remark-gfm";
+import "./message.css";
 
 export interface MessageTextProps {
   content: string;
@@ -74,5 +75,15 @@ export function HumanMessageText(props: MessageTextProps) {
         {props.content}
       </p>
     </div>
+  );
+}
+
+export function LoadingMessage() {
+  return (
+    <svg height="40" width="40" className="loader bg-gray-200 rounded-md">
+      <circle className="dot" cx="10" cy="20" r="3" style={{ fill: "grey" }} />
+      <circle className="dot" cx="20" cy="20" r="3" style={{ fill: "grey" }} />
+      <circle className="dot" cx="30" cy="20" r="3" style={{ fill: "grey" }} />
+    </svg>
   );
 }
