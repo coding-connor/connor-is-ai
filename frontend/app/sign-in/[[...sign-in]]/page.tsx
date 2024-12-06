@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
-import { useSignUp, useSignIn } from "@clerk/nextjs";
+import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { EmailCodeFactor, SignInFirstFactor } from "@clerk/types";
-import { useRouter } from "next/navigation";
-import { faLinkedin, faGithub } from "@fortawesome/free-brands-svg-icons";
+import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 
 const ERROR_USER_ALREADY_EXISTS = "form_identifier_exists";
 const ERROR_INCORRECT_CODE = "form_code_incorrect";

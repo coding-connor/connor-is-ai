@@ -1,9 +1,7 @@
 "use client";
 
-import { CircleIcon, StarIcon } from "@radix-ui/react-icons";
 import { InlineWidget } from "react-calendly";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "../ui/skeleton";
-import { format } from "date-fns";
 
 export interface CalendlyProps {
   account: string;

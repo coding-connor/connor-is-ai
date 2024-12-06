@@ -1,7 +1,5 @@
 "use client";
 
-import { InlineWidget } from "react-calendly";
-
 export function Greeting(): JSX.Element {
   return (
     <div className="border border-gray-500 rounded m-1 p-2 bg-gray-200">

@@ -1,10 +1,10 @@
 import Chat from "@/components/chat/chat";
-import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@clerk/nextjs";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
-import { SignOutButton } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
 
 export default function Home() {
   return (

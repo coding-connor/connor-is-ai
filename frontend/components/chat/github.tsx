@@ -10,8 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "../ui/skeleton";
 import { format } from "date-fns";
+import { Skeleton } from "../ui/skeleton";
 
 export interface GithubProps {
   owner: string;

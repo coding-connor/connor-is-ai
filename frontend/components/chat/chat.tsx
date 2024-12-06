@@ -1,22 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 import { EndpointsContext } from "@/app/agent";
-import { useActions } from "@/utils/client";
 import { LocalContext } from "@/app/shared";
-import { RemoteRunnable } from "@langchain/core/runnables/remote";
-import { Github, GithubLoading } from "./github";
-import { CurrentWeather, CurrentWeatherLoading } from "./weather";
-import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import { StreamEvent } from "@langchain/core/tracers/log_stream";
-import { AIMessage } from "@/ai/message";
-import { HumanMessageText } from "./message";
-import { Greeting } from "./greeting";
+import { useActions } from "@/utils/client";
 import { useAuth } from "@clerk/nextjs";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Greeting } from "./greeting";
+import { HumanMessageText } from "./message";
 
 export interface ChatProps {}
 

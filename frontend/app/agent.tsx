@@ -1,29 +1,25 @@
-import { RemoteRunnable } from "@langchain/core/runnables/remote";
-import { exposeEndpoints, streamRunnableUI } from "@/utils/server";
-import "server-only";
-import { StreamEvent } from "@langchain/core/tracers/log_stream";
-import { EventHandlerFields } from "@/utils/server";
-import {
-  Github,
-  GithubError,
-  GithubLoading,
-  GithubProps,
-} from "@/components/chat/github";
-import {
-  CurrentWeatherLoading,
-  CurrentWeather,
-} from "@/components/chat/weather";
-import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { AIMessage } from "@/ai/message";
 import {
   Calendly,
   CalendlyError,
   CalendlyLoading,
 } from "@/components/chat/calendly";
-import { cookies } from "next/headers";
-import { auth } from "@clerk/nextjs/server";
+import { Github, GithubError, GithubLoading } from "@/components/chat/github";
+import { LoadingMessage } from "@/components/chat/message";
+import {
+  CurrentWeather,
+  CurrentWeatherLoading,
+} from "@/components/chat/weather";
+import {
+  EventHandlerFields,
+  exposeEndpoints,
+  streamRunnableUI,
+} from "@/utils/server";
 import { getAuthToken } from "@/utils/server-token";
-import { AIMessageText, Loading, LoadingMessage } from "@/components/chat/message";
+import { RemoteRunnable } from "@langchain/core/runnables/remote";
+import { StreamEvent } from "@langchain/core/tracers/log_stream";
+import { createStreamableValue } from "ai/rsc";
+import "server-only";
 
 const API_URL = `${process.env.K8S_BACKEND_URL}/chat`;
 
@@ -100,9 +96,7 @@ async function agent(inputs: { input: string; thread_id: string }) {
     event: StreamEvent,
     fields: EventHandlerFields,
   ) => {
-    fields.ui.append(
-      <LoadingMessage />
-    );
+    fields.ui.append(<LoadingMessage />);
   };
 
   const handleToolStartEventt: EventHandler = (

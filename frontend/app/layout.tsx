@@ -1,15 +1,9 @@
-import "./globals.css";
 import type { Metadata } from "next";
+import "./globals.css";
 
-import { EndpointsContext } from "./agent";
+import { ClerkProvider } from "@clerk/nextjs";
 import { ReactNode } from "react";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { EndpointsContext } from "./agent";
 
 export const metadata: Metadata = {
   title: "LangChain Gen UI",
