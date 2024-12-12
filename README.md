@@ -45,8 +45,8 @@ My graph in `chain.py` implements a conversational AI assistant using LangGraph,
 
 - Tools Node (invoke_tools)
 
-- Executes external integration Calendly scheduling
-- Returns standardized ToolMessage responses
+  - Executes external integration Calendly scheduling
+  - Returns standardized ToolMessage responses
 
 - Flow Controller (invoke_tools_or_return)
 
@@ -71,7 +71,7 @@ This architecture provides a foundation for building complex conversational AI s
 
 I'm using a strategy called long-context prompting. Many LLM's have increasingly long context windows: for 4o-mini it's currently 200,000 tokens, for Gemini 1.5 is 10x that up at 2 million tokens. My system prompt is around 10% of the 4o-mini limit, or 20k tokens.
 
-[Initial research suggests](https://arxiv.org/pdf/2403.05530) that long-context prompting is just as effective as Retrieval Augmented Generation (RAG). My take: when you are at a fraction of the context limit, latency isn't a big concern, and token cost isn't a driving factor, then long-context prompting is a great way to go.
+[Initial research suggests](https://arxiv.org/pdf/2403.05530) that long-context prompting is just as effective as Retrieval Augmented Generation (RAG). My take: when you are at a fraction of the context limit, latency isn't a big concern for your use case, and token cost isn't a driving factor, then long-context prompting is a great way to go. I meet those criteria, so I'm using long-context prompting.
 
 I've developed my prompt iteratively, primarily through conversations with Claude. (For example, I'll ask Claude to identify unclear parts of my prompt, and then refine those.)
 
@@ -176,7 +176,7 @@ Most likely, I'll also use some sort of classification methodology so that only 
 
 ## What's missing?
 
-First, any type of testing. I believe that unit tests save headaches later. Professional code needs unit tests. And if you're in something like a microservice environment, you really need integration tests and e2e tests as well (something to test the boundaries between services so that when your buddy on another team changes a data structure in a resource you consume you don't lose your Saturday because everything broke in prod...not that this has ever happened to me...). This is definitely an area for improvement in this project.
+First, any type of testing. I believe that unit tests save headaches later. Professional code needs unit tests. And if you're in something like a microservice environment, you really need integration tests and e2e tests as well. This is definitely an area for improvement in this project.
 
 Second: **evaluation**. I think data-driven optimizations are going to be critical to improving AI systems. There are some cool open-source frameworks like RAGAS out there, and I'd like to move towards implementing one in this project. Right now, I'm beholden to subjective analysis of how changes to my Graph and Prompting improve responses. When there is a lot of low-hanging fruit, I think you can be pretty confident with subjective judgments. As things get more sophisticated, you need data-driven evaluations.
 
