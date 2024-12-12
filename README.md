@@ -119,7 +119,7 @@ After the user submits a prompt to the backend, the LangGraph execution events a
 
 This architecture enables fluid, context-aware UI generation driven by LLM outputs.
 
-### Infrastructure & DevOps
+## Infrastructure & DevOps
 
 Spinning up a full GKE cluster for this personal project is probably a bit of overkill. After all, one of the key benefits of kubernetes is scaling, which isn't really something I need to be worried about here!
 
