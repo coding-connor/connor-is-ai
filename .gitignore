@@ -47,6 +47,7 @@ jspm_packages/
 
 # helm
 secrets-*.yaml
+!secrets-*.example.yaml
 
 # terraform
 terraform/.terraform
