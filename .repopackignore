@@ -2,10 +2,10 @@
 # Example:
 # *.log
 # tmp/
-backend/gen_ui_backend/system_prompt/
-backend/gen_ui_backend/system_prompt_archive/
-backend/gen_ui_backend/system_prompt.example.md
+backend/system_prompts/
+backend/system_prompt_archive/
 backend/alembic
+backend/requirements.txt
 **/repopack.config.json
 **/.gitignore
 frontend/tsconfig.json

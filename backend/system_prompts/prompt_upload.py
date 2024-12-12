@@ -1,6 +1,12 @@
 from google.cloud import storage
 import os
 
+IGNORE_FILES = [
+    "aggregated_system_prompt.txt",
+    "connor_is_ai_full.txt",
+    "repo_summary.py",
+]
+
 
 def aggregate_system_prompt(directory: str) -> str:
     content = ""
@@ -8,7 +14,8 @@ def aggregate_system_prompt(directory: str) -> str:
 
     for root, _, files in os.walk(directory):
         for file in files:
-            if file == "aggregated_system_prompt.txt":
+            if file in IGNORE_FILES:
+                print(f"Ignoring file: {file}")
                 continue
             if file.endswith(".md") or file.endswith(".txt"):
                 files_to_read.append(os.path.join(root, file))
@@ -24,6 +31,7 @@ def aggregate_system_prompt(directory: str) -> str:
     output_path = os.path.join(directory, "aggregated_system_prompt.txt")
     with open(output_path, "w") as f:
         f.write(content)
+        print(f"Aggregated system prompt written to {output_path}")
 
     return content
 
@@ -40,6 +48,7 @@ def upload_system_prompt(bucket_name: str, source_dir: str):
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob("aggregated_system_prompt.txt")
     blob.upload_from_string(content)
+    print(f"File uploaded to {bucket_name}/aggregated_system_prompt.txt")
 
 
 if __name__ == "__main__":

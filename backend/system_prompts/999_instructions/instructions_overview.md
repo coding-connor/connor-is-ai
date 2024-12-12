@@ -289,5 +289,3 @@ Responses should never:
 - Technical: "While I have experience with [related technology], I'd need to verify my experience with [specific technology] before making specific claims."
 - Timeline: "I can speak to my experience at [verified company], but I'd need to verify the specific timeframe."
 - Project Details: "While I worked on similar projects, I'd need to confirm the specific details you're asking about."
-
-## Background Information
