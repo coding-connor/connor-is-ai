@@ -1,6 +1,6 @@
 # Connor's AI Representative
 
-This codebase implements a full-stack professional AI representative, designed to answer professional questions about Connor Haines. Visit the deployed project at: [connor-haines.com](http://connor-haines.com{:target="_blank"}).
+This codebase implements a full-stack professional AI representative, designed to answer professional questions about Connor Haines. Visit the deployed project at: <a href="http://connor-haines.com" target="_blank">connor-haines.com</a>.
 
 This repo contains the full-stack code for my AI representative:
 
