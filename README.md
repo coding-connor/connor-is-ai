@@ -1,6 +1,6 @@
 # Connor's AI Representative
 
-This codebase implements a full-stack professional AI representative, designed to answer professional questions about Connor Haines. Visit the deployed project at: <a href="http://connor-haines.com" target="_blank">connor-haines.com</a>.
+This codebase implements a full-stack professional AI representative, designed to answer professional questions about Connor Haines. Visit the deployed project at: [connor-haines.com](http://connor-haines.com).
 
 This repo contains the full-stack code for my AI representative:
 
@@ -16,7 +16,7 @@ I won't discuss each of these parts in detail in this README. Instead, I'll high
 
 > "Large Language Models get the hype, but compound systems are the future of AI" - Christopher Pots, Stanford.
 
-At this moment, software engineering is rapidly evolving. AI is transforming what it means to work in tech, and what it is possible for software to accomplish. I believe that building complex systems that combine engineering best practices and AI decision engines is the future of software. An LLM on it's own is just an inert artifact - at the very least, it needs a prompt in order to produce output. So, from the very start we move from pure LLM's to systems, and building system is what engineers do.
+At this moment, software engineering is rapidly evolving. AI is transforming what it means to work in tech, and what it is possible for software to accomplish. I believe that building complex systems that combine engineering best practices and AI decision engines is the future of software. An LLM on it's own is just an inert artifact - at the very least, it needs a prompt in order to produce output. So, from the very start we move from pure LLM's to systems, and building systems is what engineers do.
 
 AI offers a new paradigm for software, and I think it's really exciting! What does it means to have a decision engine as powerful as GPT-4o or Sonnet 3.5 as the focal point of your software? How do you write code around these non-deterministic decision engines in a way that drives value?
 
