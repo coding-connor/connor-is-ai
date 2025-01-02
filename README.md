@@ -10,8 +10,6 @@ This repo contains the full-stack code for my AI representative:
 - **Infrastructure as Code**: GCP Project Terraform + Helm/Kubernetes Manifest
 - **CI/CD**: Github Actions
 
-I won't discuss each of these parts in detail in this README. Instead, I'll highlight the parts I find most interesting.
-
 ## Project Motivation
 
 > "Large Language Models get the hype, but compound systems are the future of AI" - Christopher Pots, Stanford.
