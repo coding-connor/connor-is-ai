@@ -16,7 +16,7 @@ This repo contains the full-stack code for my AI representative:
 
 At this moment, software engineering is rapidly evolving. AI is transforming what it means to work in tech, and what it is possible for software to accomplish. I believe that building complex systems that combine engineering best practices and AI decision engines is the future of software. An LLM on it's own is just an inert artifact - at the very least, it needs a prompt in order to produce output. So, from the very start we move from pure LLM's to systems, and building systems is what engineers do.
 
-AI offers a new paradigm for software, and I think it's really exciting! What does it means to have a decision engine as powerful as GPT-4o or Sonnet 3.5 as the focal point of your software? How do you write code around these non-deterministic decision engines in a way that drives value?
+AI offers a new paradigm for software, and I think it's really exciting! What does it means to have a decision engine as powerful as GPT-4o or o3 or Sonnet 3.5 as the focal point of your software? How do you write code around these non-deterministic decision engines in a way that drives value?
 
 This project is my first attempt at diving into this field, and I hope it leads a to an opportunity to work professionally on an exciting AI project.
 
