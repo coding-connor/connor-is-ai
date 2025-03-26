@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from gen_ui_backend.routes.chat_session.router import router as chat_session
 from gen_ui_backend.routes.chat.router import router as chat
+from gen_ui_backend.routes.deep_research.router import router as deep_research
 
 from langchain.callbacks.base import BaseCallbackHandler
 
@@ -56,6 +57,7 @@ class VerboseDebugCallback(BaseCallbackHandler):
 # Routes
 app.include_router(chat, prefix="/chat")
 app.include_router(chat_session, prefix="/chat-session")
+app.include_router(deep_research, prefix="/deep-research")
 
 
 def start(reload=True):
