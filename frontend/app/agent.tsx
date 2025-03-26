@@ -57,8 +57,8 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   },
 };
 
-function isChainStartEvent(event: StreamEvent, endpoint: string): boolean {
-  return event.event === "on_chain_start" && event.name === `/${endpoint}`;
+function isChainStartEvent(event: StreamEvent): boolean {
+  return event.event === "on_chain_start" && event.name === "graph_wrapper";
 }
 
 function isToolStartEvent(event: StreamEvent): boolean {

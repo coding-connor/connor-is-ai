@@ -8,14 +8,14 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 langchain-core = "^0.3.10"
-langgraph = "^0.2.35"
+langgraph = "^0.2.55"
 langserve = "^0.3.0"
 python-dotenv = "^1.0.1"
 uvicorn = "^0.31.1"
 fastapi = "^0.115.0"
 pydantic = ">=2.8.2,<2.9.0" 
-langchain-openai = "^0.2.2"
-langchain-community = "^0.3.2"
+langchain-openai = "^0.3.7"
+langchain-community = "^0.3.9"
 typer = "^0.12.5"
 sse-starlette = "^2.1.3"
 clerk-backend-api = "^1.0.3"
@@ -27,7 +27,19 @@ psycopg-pool = "^3.2.3"
 langgraph-checkpoint-postgres = "^2.0.2"
 psycopg-binary = "^3.2.3"
 google-cloud-storage = "^2.19.0"
-
+openai = "^1.61.0"
+tavily-python = "^0.5.0"
+langchain-anthropic = "^0.3.9"
+langchain-groq = "^0.2.4"
+arxiv = "^2.1.3"
+pymupdf = "^1.25.3"
+xmltodict = "^0.14.2"
+linkup-sdk = "^0.2.3"
+duckduckgo-search = "^3.0.0"
+exa-py = "^1.8.8"
+requests = "^2.32.3"
+beautifulsoup4 = "4.13.3"
+langchain-deepseek = "^0.1.2"
 
 [tool.poetry.scripts]
 start = "gen_ui_backend.server:start"
@@ -38,3 +50,27 @@ pre-commit = "^4.0.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+lint.select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "D",    # pydocstyle
+    "UP",
+]
+lint.ignore = [
+    "UP006",
+    "UP007",
+    "UP035",
+    "D417",
+    "E501",
+    "D100",
+    "D101",
+    "D205",
+    "D103",
+    "D400",
+    "D401",
+    "D415"
+    
+]
