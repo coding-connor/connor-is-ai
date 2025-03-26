@@ -1,3 +1,5 @@
+"use client";
+
 import Chat from "@/components/chat/chat";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@clerk/nextjs";
@@ -27,8 +29,7 @@ export default function DeepResearch() {
           priority={true}
         />
         <p className="text-[16px] text-center font-medium">
-          Hi, you're chatting with AI Connor's Deep Research mode! I can help
-          you with in-depth research and analysis about any topic.
+          Hi, this is AI Connor's Deep Research mode!
         </p>
         <div className="flex justify-center gap-2 mt-2">
           <a

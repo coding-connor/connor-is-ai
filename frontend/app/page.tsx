@@ -1,3 +1,5 @@
+"use client";
+
 import Chat from "@/components/chat/chat";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@clerk/nextjs";

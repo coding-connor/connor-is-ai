@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Greeting } from "./greeting";
 import { HumanMessageText } from "./message";
+import { ModeSelector } from "./mode-selector";
 
 export interface ChatProps {
   endpoint?: string;
@@ -54,7 +55,7 @@ export default function Chat({ endpoint = "chat" }: ChatProps) {
     fetchThreadId();
   }, [getToken]);
 
-  const newSession = async () => {
+  const handleNewChat = async () => {
     try {
       const token = await getToken({ template: "backend" });
       const response = await fetch(
@@ -107,20 +108,10 @@ export default function Chat({ endpoint = "chat" }: ChatProps) {
   return (
     <div className="flex flex-col justify-center w-full">
       <div className="w-full h-[calc(100vh-395px)] overflow-y-scroll flex flex-col gap-4 mx-auto mb-2 border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
-        <Button
-          onClick={newSession}
-          className="absolute top-4 right-4 flex items-center px-3 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm"
-          variant={"default"}
-          size="sm"
-        >
-          <FontAwesomeIcon
-            icon={faPlusCircle}
-            className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
-          />
-          <span className="hidden sm:inline">New Chat</span>
-          <span className="sm:hidden">New</span>
-        </Button>
-        <Greeting></Greeting>
+        <div className="absolute top-4 right-4">
+          <ModeSelector onNewChat={handleNewChat} />
+        </div>
+        <Greeting endpoint={endpoint} />
         <LocalContext.Provider value={onSubmit}>
           <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
         </LocalContext.Provider>
