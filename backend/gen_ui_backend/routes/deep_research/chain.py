@@ -43,7 +43,7 @@ def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
             MessagesPlaceholder("input"),
         ]
     )
-    model = ChatOpenAI(model="gpt-4", temperature=0.7, streaming=True)
+    model = ChatOpenAI(model="gpt-4o-mini", temperature=0.7, streaming=True)
     tools = [github_repo, weather_data, calendly]
     model_with_tools = model.bind_tools(tools)
     chain = initial_prompt | model_with_tools

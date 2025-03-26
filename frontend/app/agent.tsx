@@ -21,7 +21,7 @@ import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { createStreamableValue } from "ai/rsc";
 import "server-only";
 
-const API_URL = `${process.env.K8S_BACKEND_URL}/chat`;
+const API_URL = `${process.env.K8S_BACKEND_URL}`;
 
 type ToolComponent<T = any> = {
   loading: (props?: T) => JSX.Element;
@@ -57,8 +57,8 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
   },
 };
 
-function isChainStartEvent(event: StreamEvent): boolean {
-  return event.event === "on_chain_start" && event.name === "/chat";
+function isChainStartEvent(event: StreamEvent, endpoint: string): boolean {
+  return event.event === "on_chain_start" && event.name === `/${endpoint}`;
 }
 
 function isToolStartEvent(event: StreamEvent): boolean {
@@ -77,12 +77,16 @@ function isChatModelStreamEvent(event: StreamEvent): boolean {
   );
 }
 
-async function agent(inputs: { input: string; thread_id: string }) {
+async function agent(inputs: {
+  input: string;
+  thread_id: string;
+  endpoint: string;
+}) {
   "use server";
   const token = await getAuthToken();
 
   const remoteRunnable = new RemoteRunnable({
-    url: API_URL,
+    url: `${API_URL}/${inputs.endpoint}`,
     options: { headers: { cookie: `__session=${token};` } },
   });
 
@@ -154,7 +158,7 @@ async function agent(inputs: { input: string; thread_id: string }) {
     event: StreamEvent,
     fields: EventHandlerFields,
   ) => {
-    if (isChainStartEvent(event)) {
+    if (isChainStartEvent(event, inputs.endpoint)) {
       handleChainStartEvent(event, fields);
     }
     if (isToolStartEvent(event)) {

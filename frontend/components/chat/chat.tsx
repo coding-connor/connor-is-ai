@@ -12,9 +12,11 @@ import { Input } from "../ui/input";
 import { Greeting } from "./greeting";
 import { HumanMessageText } from "./message";
 
-export interface ChatProps {}
+export interface ChatProps {
+  endpoint?: string;
+}
 
-export default function Chat() {
+export default function Chat({ endpoint = "chat" }: ChatProps) {
   const actions = useActions<typeof EndpointsContext>();
   const { getToken } = useAuth();
 
@@ -86,6 +88,7 @@ export default function Chat() {
     const element = await actions.agent({
       input,
       thread_id: threadId,
+      endpoint,
     });
 
     newElements.push(
