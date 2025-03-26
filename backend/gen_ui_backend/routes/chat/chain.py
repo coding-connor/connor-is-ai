@@ -1,3 +1,4 @@
+from gen_ui_backend.types import ChatMessage
 from gen_ui_backend.utils.storage_service import FileReaderService
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -6,8 +7,8 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph, MessagesState
 from langgraph.graph.graph import CompiledGraph
 from langgraph.checkpoint.postgres import PostgresSaver
-
-
+from langchain_core.runnables import chain
+from psycopg import Connection
 import os
 
 from gen_ui_backend.tools.calendly import calendly
@@ -118,3 +119,24 @@ def create_graph(conn) -> CompiledGraph:
     checkpointer = PostgresSaver(conn)
     graph = workflow.compile(checkpointer)
     return graph
+
+
+# Kind of annoying workaround. Langserve doesn't support Langgraph, as they want to you use Langraph Cloud. But that a lot of overhead to add another paid service, so this wrapper works for now.
+# Specifically, in order to use a Langgraph checkpointer I need to get the thread_id from the request to pass it into the config for the graph.
+@chain
+def graph_wrapper(inputs):
+    connection_kwargs = {
+        "autocommit": True,
+        "prepare_threshold": 0,
+    }
+    db_url = os.environ.get("DB_DIRECT_URL")
+    # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required
+    with Connection.connect(db_url, **connection_kwargs) as conn:
+        graph = create_graph(conn)
+        runnable = graph.with_types(input_type=ChatMessage)
+        # Create an instance of the handler
+        config = {
+            "configurable": {"thread_id": inputs["thread_id"]},
+        }
+
+        return runnable.invoke(inputs, config)
