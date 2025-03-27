@@ -2,7 +2,7 @@
 load('ext://restart_process', 'docker_build_with_restart')
 
 # Load config
-# Default is dev, but can do: tilt up -- prod to build frontend in prod mode
+# Default is dev, but can do: `tilt up -- --build_mode=prod` to build frontend in prod mode
 config.define_string(name="build_mode", args=False, usage="Mode to build frontend: dev or prod")
 cfg = config.parse()
 

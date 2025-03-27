@@ -111,6 +111,7 @@ resource "google_service_account_key" "github_key" {
 resource "google_secret_manager_secret" "app_secrets" {
   for_each = toset([
     "OPENAI_API_KEY",
+    "TAVILY_API_KEY",
     "LANGCHAIN_API_KEY", 
     "GITHUB_TOKEN",
     "CLERK_PUBLISHABLE_KEY",

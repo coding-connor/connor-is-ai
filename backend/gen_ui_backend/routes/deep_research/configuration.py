@@ -32,9 +32,9 @@ class Configuration:
     number_of_queries: int = 1  # Number of search queries to generate per iteration
     max_search_depth: int = 2  # Maximum number of reflection + search iterations
     planner_provider: str = "openai"  # Defaults to OpenAI as provider
-    planner_model: str = "gpt-4o-mini"  # Defaults to o3-mini for planning
+    planner_model: str = "gpt-o3-mini"  # Defaults to o3-mini for planning
     writer_provider: str = "openai"  # Defaults to OpenAI as provider
-    writer_model: str = "gpt-4o-mini"  # Defaults to 4o for writing
+    writer_model: str = "gpt-4o"  # Defaults to 4o for writing
     search_api: SearchAPI = SearchAPI.TAVILY  # Default to TAVILY
     search_api_config: Optional[Dict[str, Any]] = None
 

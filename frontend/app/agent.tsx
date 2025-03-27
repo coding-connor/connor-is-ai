@@ -158,7 +158,7 @@ async function agent(inputs: {
     event: StreamEvent,
     fields: EventHandlerFields,
   ) => {
-    if (isChainStartEvent(event, inputs.endpoint)) {
+    if (isChainStartEvent(event)) {
       handleChainStartEvent(event, fields);
     }
     if (isToolStartEvent(event)) {
