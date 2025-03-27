@@ -126,11 +126,17 @@ export default function Chat({ endpoint = "chat" }: ChatProps) {
           className="w-full flex flex-row gap-2"
         >
           <Input
-            placeholder="Ask Connor something..."
+            placeholder={
+              endpoint === "deep-research"
+                ? "Enter a topic to research..."
+                : "Ask Connor something..."
+            }
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit">
+            {endpoint === "deep-research" ? "Research" : "Submit"}
+          </Button>
         </form>
       </div>
       <div className="text-center text-xs mt-2 text-gray-400">
