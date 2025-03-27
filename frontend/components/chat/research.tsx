@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import { AIMessageText, HumanMessageText } from "./message";
 import { BaseChat } from "./base-chat";
 import { Greeting } from "./greeting";
-import { ModeSelector } from "./mode-selector";
 
 export interface ResearchProps {
   onNewChat: () => void;
@@ -88,7 +87,6 @@ export default function Research({ onNewChat }: ResearchProps) {
       isLoading={isLoading}
       placeholder="Enter a topic to research..."
       submitLabel={isLoading ? "Researching..." : "Research"}
-      headerContent={<ModeSelector onNewChat={handleNewChat} />}
       greeting={<Greeting endpoint="deep-research" />}
       onNewChat={handleNewChat}
     />

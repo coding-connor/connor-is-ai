@@ -2,6 +2,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useAuth } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
+import { ModeSelector } from "./mode-selector";
 
 interface BaseChatProps {
   onSubmit: (input: string, threadId: string) => Promise<void>;
@@ -12,7 +13,6 @@ interface BaseChatProps {
   placeholder?: string;
   submitLabel?: string;
   onNewChat: () => void;
-  headerContent?: React.ReactNode;
   greeting?: React.ReactNode;
 }
 
@@ -25,7 +25,6 @@ export function BaseChat({
   placeholder = "Ask something...",
   submitLabel = "Submit",
   onNewChat,
-  headerContent,
   greeting,
 }: BaseChatProps) {
   const { getToken } = useAuth();
@@ -89,7 +88,9 @@ export function BaseChat({
   return (
     <div className="flex flex-col justify-center w-full">
       <div className="w-full h-[calc(100vh-395px)] overflow-y-scroll flex flex-col gap-4 mx-auto mb-2 border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
-        <div className="absolute top-4 right-4">{headerContent}</div>
+        <div className="absolute top-4 right-4">
+          <ModeSelector onNewChat={handleNewChat} />
+        </div>
         {greeting}
         <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
       </div>

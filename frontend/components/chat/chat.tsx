@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Greeting } from "./greeting";
 import { HumanMessageText } from "./message";
-import { ModeSelector } from "./mode-selector";
 import { BaseChat } from "./base-chat";
 
 export interface ChatProps {
@@ -48,17 +47,14 @@ export default function Chat({ endpoint = "chat" }: ChatProps) {
   };
 
   return (
-    <LocalContext.Provider value={onSubmit}>
-      <BaseChat
-        onSubmit={onSubmit}
-        elements={elements}
-        input={input}
-        setInput={setInput}
-        placeholder="Ask Connor something..."
-        headerContent={<ModeSelector onNewChat={handleNewChat} />}
-        greeting={<Greeting endpoint={endpoint} />}
-        onNewChat={handleNewChat}
-      />
-    </LocalContext.Provider>
+    <BaseChat
+      onSubmit={onSubmit}
+      elements={elements}
+      input={input}
+      setInput={setInput}
+      placeholder="Ask Connor something..."
+      greeting={<Greeting endpoint={endpoint} />}
+      onNewChat={handleNewChat}
+    />
   );
 }

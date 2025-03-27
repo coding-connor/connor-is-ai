@@ -1,16 +1,12 @@
-import os
 from typing import Any, Literal
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.runnables import RunnableConfig, chain
-from langgraph.checkpoint.postgres import PostgresSaver
+from langchain_core.runnables import RunnableConfig
 from langgraph.constants import Send
 from langgraph.graph import END, START, StateGraph
-from langgraph.graph.graph import CompiledGraph
 from langgraph.types import Command
 from langserve import serialization
-from psycopg import Connection
 from pydantic import BaseModel
 
 from .configuration import Configuration
@@ -29,7 +25,6 @@ from .state import (
     ReportState,
     ReportStateInput,
     ReportStateOutput,
-    ResearchInput,
     SectionOutputState,
     Sections,
     SectionState,
@@ -60,7 +55,7 @@ serialization.default = custom_default
 ## Nodes --
 
 
-def generate_report_plan(state: ReportState, config: RunnableConfig):
+async def generate_report_plan(state: ReportState, config: RunnableConfig):
     """Generate the initial report plan with sections.
 
     This node:
@@ -128,7 +123,7 @@ def generate_report_plan(state: ReportState, config: RunnableConfig):
     query_list = [query.search_query for query in results.queries]
 
     # Search the web with parameters
-    source_str = select_and_execute_search(search_api, query_list, params_to_pass)
+    source_str = await select_and_execute_search(search_api, query_list, params_to_pass)
 
     # Format system instructions
     system_instructions_sections = report_planner_instructions.format(
@@ -290,7 +285,7 @@ def generate_queries(state: SectionState, config: RunnableConfig):
     return {"search_queries": queries.queries}
 
 
-def search_web(state: SectionState, config: RunnableConfig):
+async def search_web(state: SectionState, config: RunnableConfig):
     """Execute web searches for the section queries.
 
     This node:
@@ -325,7 +320,7 @@ def search_web(state: SectionState, config: RunnableConfig):
     query_list = [query.search_query for query in search_queries]
 
     # Search the web with parameters
-    source_str = select_and_execute_search(search_api, query_list, params_to_pass)
+    source_str = await select_and_execute_search(search_api, query_list, params_to_pass)
 
     return {
         "source_str": source_str,
@@ -601,66 +596,41 @@ section_builder.add_edge("search_web", "write_section")
 # Outer graph for initial report plan compiling results from each section --
 
 
-def create_graph(conn) -> CompiledGraph:
-    # Add nodes
-    section_builder = StateGraph(SectionState, output=SectionOutputState)
-    section_builder.add_node("generate_queries", generate_queries)
-    section_builder.add_node("search_web", search_web)
-    section_builder.add_node("write_section", write_section)
+# Add nodes
+section_builder = StateGraph(SectionState, output=SectionOutputState)
+section_builder.add_node("generate_queries", generate_queries)
+section_builder.add_node("search_web", search_web)
+section_builder.add_node("write_section", write_section)
 
-    # Add edges
-    section_builder.add_edge(START, "generate_queries")
-    section_builder.add_edge("generate_queries", "search_web")
-    section_builder.add_edge("search_web", "write_section")
+# Add edges
+section_builder.add_edge(START, "generate_queries")
+section_builder.add_edge("generate_queries", "search_web")
+section_builder.add_edge("search_web", "write_section")
 
-    # Outer graph for initial report plan compiling results from each section --
+# Outer graph for initial report plan compiling results from each section --
 
-    # Add nodes
-    builder = StateGraph(
-        ReportState,
-        input=ReportStateInput,
-        output=ReportStateOutput,
-        config_schema=Configuration,
-    )
-    builder.add_node("generate_report_plan", generate_report_plan)
-    builder.add_node("human_feedback", human_feedback)
-    builder.add_node("build_section_with_web_research", section_builder.compile())
-    builder.add_node("gather_completed_sections", gather_completed_sections)
-    builder.add_node("write_final_sections", write_final_sections)
-    builder.add_node("compile_final_report", compile_final_report)
+# Add nodes
+builder = StateGraph(
+    ReportState,
+    input=ReportStateInput,
+    output=ReportStateOutput,
+    config_schema=Configuration,
+)
+builder.add_node("generate_report_plan", generate_report_plan)
+builder.add_node("human_feedback", human_feedback)
+builder.add_node("build_section_with_web_research", section_builder.compile())
+builder.add_node("gather_completed_sections", gather_completed_sections)
+builder.add_node("write_final_sections", write_final_sections)
+builder.add_node("compile_final_report", compile_final_report)
 
-    # Add edges
-    builder.add_edge(START, "generate_report_plan")
-    builder.add_edge("generate_report_plan", "human_feedback")
-    builder.add_edge("build_section_with_web_research", "gather_completed_sections")
-    builder.add_conditional_edges(
-        "gather_completed_sections",
-        initiate_final_section_writing,
-        ["write_final_sections"],
-    )
-    builder.add_edge("write_final_sections", "compile_final_report")
-    builder.add_edge("compile_final_report", END)
-
-    checkpointer = PostgresSaver(conn)
-    graph = builder.compile(checkpointer)
-    return graph
-
-
-# Kind of annoying workaround. Langserve doesn't support Langgraph, as they want to you use Langraph Cloud. But that a lot of overhead to add another paid service, so this wrapper works for now.
-# Specifically, in order to use a Langgraph checkpointer I need to get the thread_id from the request to pass it into the config for the graph.
-@chain
-def graph_wrapper(input: ResearchInput):
-    connection_kwargs = {
-        "autocommit": True,
-        "prepare_threshold": 0,
-    }
-    db_url = os.environ.get("DB_DIRECT_URL")
-    # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required
-    with Connection.connect(db_url, **connection_kwargs) as conn:
-        graph = create_graph(conn)
-        runnable = graph.with_types(input_type=ReportStateInput)
-        config = {
-            "configurable": {"thread_id": input.thread_id},
-        }
-
-        return runnable.invoke({"topic": input.topic}, config)
+# Add edges
+builder.add_edge(START, "generate_report_plan")
+builder.add_edge("generate_report_plan", "human_feedback")
+builder.add_edge("build_section_with_web_research", "gather_completed_sections")
+builder.add_conditional_edges(
+    "gather_completed_sections",
+    initiate_final_section_writing,
+    ["write_final_sections"],
+)
+builder.add_edge("write_final_sections", "compile_final_report")
+builder.add_edge("compile_final_report", END)

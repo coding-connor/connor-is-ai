@@ -1,6 +1,8 @@
+import asyncio
 from typing import Any, Dict, Optional
 
 from langsmith import traceable
+from tavily import AsyncTavilyClient
 
 from .state import Section
 
@@ -173,7 +175,51 @@ def tavily_search(search_queries):
     return search_docs
 
 
-def select_and_execute_search(
+@traceable
+async def tavily_search_async(search_queries):
+    """Performs concurrent web searches using the Tavily API.
+
+    Args:
+    ----
+        search_queries (List[SearchQuery]): List of search queries to process
+
+    Returns:
+    -------
+            List[dict]: List of search responses from Tavily API, one per query. Each response has format:
+                {
+                    'query': str, # The original search query
+                    'follow_up_questions': None,
+                    'answer': None,
+                    'images': list,
+                    'results': [                     # List of search results
+                        {
+                            'title': str,            # Title of the webpage
+                            'url': str,              # URL of the result
+                            'content': str,          # Summary/snippet of content
+                            'score': float,          # Relevance score
+                            'raw_content': str|None  # Full page content if available
+                        },
+                        ...
+                    ]
+                }
+
+    """
+    tavily_async_client = AsyncTavilyClient()
+    search_tasks = []
+    for query in search_queries:
+        search_tasks.append(
+            tavily_async_client.search(
+                query, max_results=5, include_raw_content=True, topic="general"
+            )
+        )
+
+    # Execute all searches concurrently
+    search_docs = await asyncio.gather(*search_tasks)
+
+    return search_docs
+
+
+async def select_and_execute_search(
     search_api: str, query_list: list[str], params_to_pass: dict
 ) -> str:
     """Select and execute the appropriate search API.
@@ -194,7 +240,7 @@ def select_and_execute_search(
 
     """
     if search_api == "tavily":
-        search_results = tavily_search(query_list)
+        search_results = await tavily_search_async(query_list, **params_to_pass)
         return deduplicate_and_format_sources(
             search_results, max_tokens_per_source=4000, include_raw_content=False
         )
