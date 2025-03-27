@@ -19,14 +19,7 @@ DEFAULT_REPORT_STRUCTURE = """Use this structure to create a report on the user-
 
 
 class SearchAPI(Enum):
-    PERPLEXITY = "perplexity"
     TAVILY = "tavily"
-    EXA = "exa"
-    ARXIV = "arxiv"
-    PUBMED = "pubmed"
-    LINKUP = "linkup"
-    DUCKDUCKGO = "duckduckgo"
-    GOOGLESEARCH = "googlesearch"
 
 
 @dataclass(kw_only=True)

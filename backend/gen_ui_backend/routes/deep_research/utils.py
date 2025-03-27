@@ -9,7 +9,6 @@ from urllib.parse import unquote
 import aiohttp
 import requests
 from bs4 import BeautifulSoup
-from deep_research.state import Section
 from duckduckgo_search import DDGS
 from exa_py import Exa
 from langchain_community.retrievers import ArxivRetriever
@@ -17,6 +16,8 @@ from langchain_community.utilities.pubmed import PubMedAPIWrapper
 from langsmith import traceable
 from linkup import LinkupClient
 from tavily import AsyncTavilyClient
+
+from .state import Section
 
 
 def get_config_value(value):
