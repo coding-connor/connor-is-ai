@@ -1,29 +1,18 @@
-"use client";
-
-import { EndpointsContext } from "@/app/agent";
-import { LocalContext } from "@/app/shared";
-import { useActions } from "@/utils/client";
 import { useAuth } from "@clerk/nextjs";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Greeting } from "./greeting";
 import { HumanMessageText } from "./message";
-import { ModeSelector } from "./mode-selector";
-import Research from "./research";
 
-export interface ChatProps {
-  endpoint?: string;
+export interface ResearchProps {
+  onNewChat: () => void;
 }
 
-export default function Chat({ endpoint = "chat" }: ChatProps) {
-  const actions = useActions<typeof EndpointsContext>();
+export default function Research({ onNewChat }: ResearchProps) {
   const { getToken } = useAuth();
-
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState<string>("");
 
   useEffect(() => {
@@ -47,7 +36,6 @@ export default function Chat({ endpoint = "chat" }: ChatProps) {
 
         const data = await response.json();
         setThreadId(data.session_id);
-        console.log("Thread ID:", data.session_id);
       } catch (error) {
         console.error("Error fetching Thread ID:", error);
       }
@@ -56,70 +44,76 @@ export default function Chat({ endpoint = "chat" }: ChatProps) {
     fetchThreadId();
   }, [getToken]);
 
-  const handleNewChat = async () => {
+  async function onSubmit(input: string) {
+    setIsLoading(true);
+    const newElements = [...elements];
+
     try {
       const token = await getToken({ template: "backend" });
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat-session/new`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/deep-research`,
         {
           method: "POST",
-          body: JSON.stringify({ session_id: threadId }),
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify({
+            topic: input,
+            thread_id: threadId,
+          }),
         },
       );
+
       if (!response.ok) {
-        throw new Error("Failed to end session");
+        throw new Error("Research request failed");
       }
-      console.log("Session ended successfully");
+
       const data = await response.json();
-      setThreadId(data.session_id);
-      setElements([]);
-      setInput("");
-      console.log("Thread ID:", data.session_id);
+
+      newElements.push(
+        <div
+          className="flex flex-col w-full gap-1 mt-auto"
+          key={elements.length}
+        >
+          <HumanMessageText content={input} />
+          <div className="flex flex-col gap-1 w-full max-w-fit mr-auto">
+            {data.final_report}
+          </div>
+        </div>,
+      );
     } catch (error) {
-      console.error("Error ending session:", error);
+      console.error("Research error:", error);
+      newElements.push(
+        <div
+          className="flex flex-col w-full gap-1 mt-auto"
+          key={elements.length}
+        >
+          <HumanMessageText content={input} />
+          <div className="flex flex-col gap-1 w-full max-w-fit mr-auto text-red-500">
+            Error: Failed to complete research. Please try again.
+          </div>
+        </div>,
+      );
+    } finally {
+      setIsLoading(false);
+      setElements(newElements);
+      setInput("");
     }
-  };
-
-  async function onSubmit(input: string) {
-    const newElements = [...elements];
-
-    const element = await actions.agent({
-      input,
-      thread_id: threadId,
-      endpoint,
-    });
-
-    newElements.push(
-      <div className="flex flex-col w-full gap-1 mt-auto" key={elements.length}>
-        <HumanMessageText content={input} />
-        <div className="flex flex-col gap-1 w-full max-w-fit mr-auto">
-          {element.ui}
-        </div>
-      </div>,
-    );
-
-    setElements(newElements);
-    setInput("");
-  }
-
-  if (endpoint === "deep-research") {
-    return <Research onNewChat={handleNewChat} />;
   }
 
   return (
     <div className="flex flex-col justify-center w-full">
       <div className="w-full h-[calc(100vh-395px)] overflow-y-scroll flex flex-col gap-4 mx-auto mb-2 border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
         <div className="absolute top-4 right-4">
-          <ModeSelector onNewChat={handleNewChat} />
+          <Button onClick={onNewChat} variant="outline">
+            New Research
+          </Button>
         </div>
-        <Greeting endpoint={endpoint} />
-        <LocalContext.Provider value={onSubmit}>
-          <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
-        </LocalContext.Provider>
+        <div className="text-center text-gray-600">
+          Enter a topic to research and I'll provide a comprehensive analysis.
+        </div>
+        <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
       </div>
       <div className="w-full flex flex-col gap-4 mx-auto mb-2 bg-gray-50/25">
         <form
@@ -131,11 +125,14 @@ export default function Chat({ endpoint = "chat" }: ChatProps) {
           className="w-full flex flex-row gap-2"
         >
           <Input
-            placeholder="Ask Connor something..."
+            placeholder="Enter a topic to research..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading}
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Researching..." : "Research"}
+          </Button>
         </form>
       </div>
       <div className="text-center text-xs mt-2 text-gray-400">

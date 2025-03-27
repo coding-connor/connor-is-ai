@@ -2,6 +2,7 @@ import operator
 from typing import Annotated, List, Literal, TypedDict
 
 from pydantic import BaseModel, Field
+from typing_extensions import TypedDict
 
 
 class Section(BaseModel):
@@ -24,7 +25,9 @@ class Sections(BaseModel):
 
 
 class SearchQuery(BaseModel):
-    search_query: str = Field(None, description="Query for web search.")
+    search_query: str = Field(
+        description="The search query to use for web research.",
+    )
 
 
 class Queries(BaseModel):
@@ -44,6 +47,11 @@ class Feedback(BaseModel):
 
 class ReportStateInput(TypedDict):
     topic: str  # Report topic
+
+
+class ResearchInput(BaseModel):
+    topic: str
+    thread_id: str
 
 
 class ReportStateOutput(TypedDict):

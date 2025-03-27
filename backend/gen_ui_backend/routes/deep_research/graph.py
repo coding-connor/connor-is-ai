@@ -13,8 +13,6 @@ from langserve import serialization
 from psycopg import Connection
 from pydantic import BaseModel
 
-from gen_ui_backend.types import ChatMessage
-
 from .configuration import Configuration
 from .prompts import (
     final_section_writer_instructions,
@@ -31,6 +29,7 @@ from .state import (
     ReportState,
     ReportStateInput,
     ReportStateOutput,
+    ResearchInput,
     SectionOutputState,
     Sections,
     SectionState,
@@ -650,7 +649,7 @@ def create_graph(conn) -> CompiledGraph:
 # Kind of annoying workaround. Langserve doesn't support Langgraph, as they want to you use Langraph Cloud. But that a lot of overhead to add another paid service, so this wrapper works for now.
 # Specifically, in order to use a Langgraph checkpointer I need to get the thread_id from the request to pass it into the config for the graph.
 @chain
-def graph_wrapper(inputs: ChatMessage):
+def graph_wrapper(input: ResearchInput):
     connection_kwargs = {
         "autocommit": True,
         "prepare_threshold": 0,
@@ -659,10 +658,9 @@ def graph_wrapper(inputs: ChatMessage):
     # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required
     with Connection.connect(db_url, **connection_kwargs) as conn:
         graph = create_graph(conn)
-        report_input = {"topic": inputs["messages"][-1]}
         runnable = graph.with_types(input_type=ReportStateInput)
         config = {
-            "configurable": {"thread_id": inputs["thread_id"]},
+            "configurable": {"thread_id": input.thread_id},
         }
 
-        return runnable.invoke(report_input, config)
+        return runnable.invoke({"topic": input.topic}, config)
