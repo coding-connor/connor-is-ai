@@ -8,7 +8,7 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.constants import Send
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.graph import CompiledGraph
-from langgraph.types import Command, interrupt
+from langgraph.types import Command
 from psycopg import Connection
 
 from gen_ui_backend.types import ChatMessage
@@ -185,20 +185,20 @@ def human_feedback(
     # Get sections
     topic = state["topic"]
     sections = state["sections"]
-    sections_str = "\n\n".join(
-        f"Section: {section.name}\n"
-        f"Description: {section.description}\n"
-        f"Research needed: {'Yes' if section.research else 'No'}\n"
-        for section in sections
-    )
+    # sections_str = "\n\n".join(
+    #     f"Section: {section.name}\n"
+    #     f"Description: {section.description}\n"
+    #     f"Research needed: {'Yes' if section.research else 'No'}\n"
+    #     for section in sections
+    # )
 
     # Get feedback on the report plan from interrupt
-    interrupt_message = f"""Please provide feedback on the following report plan. 
-                        \n\n{sections_str}\n
-                        \nDoes the report plan meet your needs?\nPass 'true' to approve the report plan.\nOr, provide feedback to regenerate the report plan:"""
+    # interrupt_message = f"""Please provide feedback on the following report plan.
+    #                     \n\n{sections_str}\n
+    #                     \nDoes the report plan meet your needs?\nPass 'true' to approve the report plan.\nOr, provide feedback to regenerate the report plan:"""
 
-    feedback = interrupt(interrupt_message)
-
+    # feedback = interrupt(interrupt_message)
+    feedback = True
     # If the user approves the report plan, kick off section writing
     if isinstance(feedback, bool) and feedback is True:
         # Treat this as approve and kick off section writing
@@ -273,7 +273,7 @@ def generate_queries(state: SectionState, config: RunnableConfig):
     return {"search_queries": queries.queries}
 
 
-async def search_web(state: SectionState, config: RunnableConfig):
+def search_web(state: SectionState, config: RunnableConfig):
     """Execute web searches for the section queries.
 
     This node:
@@ -308,7 +308,7 @@ async def search_web(state: SectionState, config: RunnableConfig):
     query_list = [query.search_query for query in search_queries]
 
     # Search the web with parameters
-    source_str = await select_and_execute_search(search_api, query_list, params_to_pass)
+    source_str = select_and_execute_search(search_api, query_list, params_to_pass)
 
     return {
         "source_str": source_str,
@@ -583,6 +583,19 @@ section_builder.add_edge("search_web", "write_section")
 
 
 def create_graph(conn) -> CompiledGraph:
+    # Add nodes
+    section_builder = StateGraph(SectionState, output=SectionOutputState)
+    section_builder.add_node("generate_queries", generate_queries)
+    section_builder.add_node("search_web", search_web)
+    section_builder.add_node("write_section", write_section)
+
+    # Add edges
+    section_builder.add_edge(START, "generate_queries")
+    section_builder.add_edge("generate_queries", "search_web")
+    section_builder.add_edge("search_web", "write_section")
+
+    # Outer graph for initial report plan compiling results from each section --
+
     # Add nodes
     builder = StateGraph(
         ReportState,
