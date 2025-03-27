@@ -1,5 +1,5 @@
 import os
-from typing import Literal
+from typing import Any, Literal
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -9,7 +9,9 @@ from langgraph.constants import Send
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.graph import CompiledGraph
 from langgraph.types import Command
+from langserve import serialization
 from psycopg import Connection
+from pydantic import BaseModel
 
 from gen_ui_backend.types import ChatMessage
 
@@ -39,6 +41,22 @@ from .utils import (
     get_search_params,
     select_and_execute_search,
 )
+
+
+# Add custom serialization for LangGraph types
+def custom_default(obj) -> Any:
+    """Custom serialization for well known objects."""
+    if isinstance(obj, BaseModel):
+        return obj.model_dump()
+    if isinstance(obj, Send):
+        return {"node": obj.node, "arg": obj.arg}
+    if isinstance(obj, Command):
+        return {"type": "command", "goto": obj.goto, "update": obj.update}
+    return super().default(obj)
+
+
+# Monkey patch the default function
+serialization.default = custom_default
 
 ## Nodes --
 
@@ -416,7 +434,7 @@ def write_section(
         or state["search_iterations"] >= configurable.max_search_depth
     ):
         # Publish the section to completed sections
-        return Command(update={"completed_sections": [section]}, goto=END)
+        return Command(update={"completed_sections": [section]})
 
     # Update the existing section with new content and update search queries
     else:
@@ -532,6 +550,8 @@ def compile_final_report(state: ReportState):
 
     # Compile final report
     all_sections = "\n\n".join([s.content for s in sections])
+    print("ALL SECTTIONS")
+    print(all_sections)
 
     return {"final_report": all_sections}
 
@@ -639,10 +659,8 @@ def graph_wrapper(inputs: ChatMessage):
     # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required
     with Connection.connect(db_url, **connection_kwargs) as conn:
         graph = create_graph(conn)
-        # Map chat message to report topic input
         report_input = {"topic": inputs["messages"][-1]}
         runnable = graph.with_types(input_type=ReportStateInput)
-        # Create an instance of the handler
         config = {
             "configurable": {"thread_id": inputs["thread_id"]},
         }

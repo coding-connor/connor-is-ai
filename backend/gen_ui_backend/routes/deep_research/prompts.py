@@ -55,7 +55,7 @@ Each section should have the fields:
 
 - Name - Name for this section of the report.
 - Description - Brief overview of the main topics covered in this section.
-- Research - Whether to perform web research for this section of the report.
+- Research - Whether to perform web research for this section of the report. (This should be True for all sections except the Introduction and Conclusion)
 - Content - The content of the section, which you will leave blank for now.
 
 Integration guidelines:

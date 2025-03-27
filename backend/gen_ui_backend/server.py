@@ -1,14 +1,15 @@
 import os
+
 import uvicorn
-from gen_ui_backend.utils.auth import auth_dependency
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from gen_ui_backend.routes.chat_session.router import router as chat_session
-from gen_ui_backend.routes.chat.router import router as chat
-from gen_ui_backend.routes.deep_research.router import router as deep_research
-
 from langchain.callbacks.base import BaseCallbackHandler
+
+from gen_ui_backend.routes.chat.router import router as chat
+from gen_ui_backend.routes.chat_session.router import router as chat_session
+from gen_ui_backend.routes.deep_research.router import router as deep_research
+from gen_ui_backend.utils.auth import auth_dependency
 
 # Load environment variables from .env file
 load_dotenv()
@@ -61,7 +62,12 @@ app.include_router(deep_research, prefix="/deep-research")
 
 
 def start(reload=True):
-    uvicorn.run("gen_ui_backend.server:app", host="0.0.0.0", port=8000, reload=reload)
+    uvicorn.run(
+        "gen_ui_backend.server:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=reload,
+    )
 
 
 if __name__ == "__main__":

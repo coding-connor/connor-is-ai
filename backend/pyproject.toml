@@ -40,6 +40,7 @@ exa-py = "^1.8.8"
 requests = "^2.32.3"
 beautifulsoup4 = "4.13.3"
 langchain-deepseek = "^0.1.2"
+starlette = "^0.46.1"
 
 [tool.poetry.scripts]
 start = "gen_ui_backend.server:start"
@@ -67,8 +68,9 @@ lint.ignore = [
     "E501",
     "D100",
     "D101",
-    "D205",
     "D103",
+    "D105",
+    "D205",
     "D400",
     "D401",
     "D415"
