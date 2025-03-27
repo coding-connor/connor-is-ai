@@ -1,11 +1,17 @@
+import os
 from typing import Literal
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.runnables import RunnableConfig
+from langchain_core.runnables import RunnableConfig, chain
+from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.constants import Send
 from langgraph.graph import END, START, StateGraph
+from langgraph.graph.graph import CompiledGraph
 from langgraph.types import Command, interrupt
+from psycopg import Connection
+
+from gen_ui_backend.types import ChatMessage
 
 from .configuration import Configuration
 from .prompts import (
@@ -37,7 +43,7 @@ from .utils import (
 ## Nodes --
 
 
-async def generate_report_plan(state: ReportState, config: RunnableConfig):
+def generate_report_plan(state: ReportState, config: RunnableConfig):
     """Generate the initial report plan with sections.
 
     This node:
@@ -105,7 +111,7 @@ async def generate_report_plan(state: ReportState, config: RunnableConfig):
     query_list = [query.search_query for query in results.queries]
 
     # Search the web with parameters
-    source_str = await select_and_execute_search(search_api, query_list, params_to_pass)
+    source_str = select_and_execute_search(search_api, query_list, params_to_pass)
 
     # Format system instructions
     system_instructions_sections = report_planner_instructions.format(
@@ -575,31 +581,57 @@ section_builder.add_edge("search_web", "write_section")
 
 # Outer graph for initial report plan compiling results from each section --
 
-# Add nodes
-builder = StateGraph(
-    ReportState,
-    input=ReportStateInput,
-    output=ReportStateOutput,
-    config_schema=Configuration,
-)
-builder.add_node("generate_report_plan", generate_report_plan)
-builder.add_node("human_feedback", human_feedback)
-builder.add_node("build_section_with_web_research", section_builder.compile())
-builder.add_node("gather_completed_sections", gather_completed_sections)
-builder.add_node("write_final_sections", write_final_sections)
-builder.add_node("compile_final_report", compile_final_report)
 
-# Add edges
-builder.add_edge(START, "generate_report_plan")
-builder.add_edge("generate_report_plan", "human_feedback")
-builder.add_edge("build_section_with_web_research", "gather_completed_sections")
-builder.add_conditional_edges(
-    "gather_completed_sections",
-    initiate_final_section_writing,
-    ["write_final_sections"],
-)
-builder.add_edge("write_final_sections", "compile_final_report")
-builder.add_edge("compile_final_report", END)
+def create_graph(conn) -> CompiledGraph:
+    # Add nodes
+    builder = StateGraph(
+        ReportState,
+        input=ReportStateInput,
+        output=ReportStateOutput,
+        config_schema=Configuration,
+    )
+    builder.add_node("generate_report_plan", generate_report_plan)
+    builder.add_node("human_feedback", human_feedback)
+    builder.add_node("build_section_with_web_research", section_builder.compile())
+    builder.add_node("gather_completed_sections", gather_completed_sections)
+    builder.add_node("write_final_sections", write_final_sections)
+    builder.add_node("compile_final_report", compile_final_report)
 
-# Compile and export the graph
-graph = builder.compile()
+    # Add edges
+    builder.add_edge(START, "generate_report_plan")
+    builder.add_edge("generate_report_plan", "human_feedback")
+    builder.add_edge("build_section_with_web_research", "gather_completed_sections")
+    builder.add_conditional_edges(
+        "gather_completed_sections",
+        initiate_final_section_writing,
+        ["write_final_sections"],
+    )
+    builder.add_edge("write_final_sections", "compile_final_report")
+    builder.add_edge("compile_final_report", END)
+
+    checkpointer = PostgresSaver(conn)
+    graph = builder.compile(checkpointer)
+    return graph
+
+
+# Kind of annoying workaround. Langserve doesn't support Langgraph, as they want to you use Langraph Cloud. But that a lot of overhead to add another paid service, so this wrapper works for now.
+# Specifically, in order to use a Langgraph checkpointer I need to get the thread_id from the request to pass it into the config for the graph.
+@chain
+def graph_wrapper(inputs: ChatMessage):
+    connection_kwargs = {
+        "autocommit": True,
+        "prepare_threshold": 0,
+    }
+    db_url = os.environ.get("DB_DIRECT_URL")
+    # Note: keep an eye on usage and make this db connection more sophisticated with pooling if required
+    with Connection.connect(db_url, **connection_kwargs) as conn:
+        graph = create_graph(conn)
+        # Map chat message to report topic input
+        report_input = {"topic": inputs["messages"][-1]}
+        runnable = graph.with_types(input_type=ReportStateInput)
+        # Create an instance of the handler
+        config = {
+            "configurable": {"thread_id": inputs["thread_id"]},
+        }
+
+        return runnable.invoke(report_input, config)

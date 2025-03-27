@@ -846,9 +846,9 @@ langchain-text-splitters==0.3.7 ; python_version >= "3.11" and python_version < 
 langchain==0.3.21 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:a10c81f8c450158af90bf37190298d996208cfd15dd3accc1c585f068473d619 \
     --hash=sha256:c8bd2372440cc5d48cb50b2d532c2e24036124f1c467002ceb15bc7b86c92579
-langgraph-checkpoint-postgres==2.0.19 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:62c08a21e9cd677469ca8f7bd94df782d8d9099cfe60e90ab828e479d62861e1 \
-    --hash=sha256:a4ccff1b07685774af58e6057b8516bd50cf7fa6df1271c2ec26b345f0dac2ed
+langgraph-checkpoint-postgres==2.0.2 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:76f17cdbed00b222edfae62171f22be2505980f64148214d50dcadcd15c6f84a \
+    --hash=sha256:b9ca46d680bc21a4f0fd1cd8df72e8da0dd9b1049ed1601a5cf73bf6f8d16bcc
 langgraph-checkpoint==2.0.23 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:38bd1fe451b569b773fef6e3daecdeb85f3deac2d94f7551bfd20f1818042c8a \
     --hash=sha256:e54d070124f685eab095bd87e4df35dc5eca11d1e28553d5803c28c5f571b4e0
