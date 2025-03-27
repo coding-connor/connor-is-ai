@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Chat from "@/components/chat/chat";
 import Research from "@/components/chat/research";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@clerk/nextjs";
@@ -8,7 +10,13 @@ import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 
-export default function DeepResearch() {
+export default function ChatPage() {
+  const [mode, setMode] = useState<"chat" | "research">("chat");
+
+  const handleNewChat = () => {
+    setMode("chat");
+  };
+
   return (
     <main className="relative flex h-screen flex-col items-center justify-between px-3 sm:px-24">
       <Button
@@ -29,7 +37,8 @@ export default function DeepResearch() {
           priority={true}
         />
         <p className="text-[16px] text-center font-medium">
-          Hi, this is AI Connor's Deep Research mode!
+          Hi, you're chatting with AI Connor! I answer professional questions
+          about Connor Haines.
         </p>
         <div className="flex justify-center gap-2 mt-2">
           <a
@@ -54,7 +63,7 @@ export default function DeepResearch() {
             <FontAwesomeIcon icon={faCalendar} className="h-6" />
           </a>
         </div>
-        <Research onNewChat={() => {}} />
+        {mode === "chat" ? <Chat /> : <Research onNewChat={handleNewChat} />}
       </div>
     </main>
   );

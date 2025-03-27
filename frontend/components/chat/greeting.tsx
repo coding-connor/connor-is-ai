@@ -13,9 +13,9 @@ export function Greeting({ endpoint = "chat" }: GreetingProps): JSX.Element {
       "📅 Curious? Ask me to schedule a meeting with the real Connor.",
     ],
     "deep-research": [
-      "🔍 Ask me to research any topic in depth, and I'll provide comprehensive analysis.",
-      "📚 I will search the web for information on any topic.",
-      "🤔 I'm based on the LangChain open source deep-research implementation.",
+      "🔍 Enter a topic to research and I'll provide a comprehensive analysis.",
+      "📚 I'm based on the LangChain open source deep-research implementation.",
+      "🤔 Please be patient while I research your topic!",
     ],
   };
 

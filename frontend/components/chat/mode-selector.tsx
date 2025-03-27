@@ -31,7 +31,7 @@ interface ChatMode {
 const CHAT_MODES: ChatMode[] = [
   {
     name: "Chat",
-    path: "/",
+    path: "/chat",
     icon: faComments,
     description: "Chat with AI Connor about his professional experience",
   },
