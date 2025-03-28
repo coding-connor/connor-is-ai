@@ -29,8 +29,8 @@ class Configuration:
     report_structure: str = (
         DEFAULT_REPORT_STRUCTURE  # Defaults to the default report structure
     )
-    number_of_queries: int = 1  # Number of search queries to generate per iteration
-    max_search_depth: int = 2  # Maximum number of reflection + search iterations
+    number_of_queries: int = 2  # Number of search queries to generate per iteration
+    max_search_depth: int = 3  # Maximum number of reflection + search iterations
     planner_provider: str = "openai"  # Defaults to OpenAI as provider
     planner_model: str = "o3-mini"  # Defaults to o3-mini for planning
     writer_provider: str = "openai"  # Defaults to OpenAI as provider
