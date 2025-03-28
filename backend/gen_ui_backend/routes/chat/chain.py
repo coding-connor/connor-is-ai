@@ -11,8 +11,8 @@ from langgraph.graph.graph import CompiledGraph
 from psycopg import Connection
 
 from gen_ui_backend.tools.calendly import calendly
+from gen_ui_backend.tools.crypto import crypto_price
 from gen_ui_backend.tools.github import github_repo
-from gen_ui_backend.tools.weather import weather_data
 from gen_ui_backend.types import ChatMessage
 from gen_ui_backend.utils.storage_service import FileReaderService
 
@@ -47,7 +47,7 @@ def invoke_model(state: MessagesState, config: RunnableConfig) -> MessagesState:
         ]
     )
     model = ChatOpenAI(model="gpt-4o-mini", temperature=0, streaming=True)
-    tools = [github_repo, weather_data, calendly]
+    tools = [github_repo, calendly, crypto_price]
     model_with_tools = model.bind_tools(tools)
     chain = initial_prompt | model_with_tools
     result = chain.invoke({"input": state["messages"]}, config)
@@ -75,8 +75,8 @@ def invoke_tools_or_return(state: MessagesState) -> str:
 def invoke_tools(state: MessagesState) -> MessagesState:
     tools_map = {
         "github-repo": github_repo,
-        "weather-data": weather_data,
         "calendly": calendly,
+        "crypto-price": crypto_price,
     }
 
     last_message = state["messages"][-1]

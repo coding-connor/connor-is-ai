@@ -4,6 +4,11 @@ import {
   CalendlyError,
   CalendlyLoading,
 } from "@/components/chat/calendly";
+import {
+  CryptoPrice,
+  CryptoPriceError,
+  CryptoPriceLoading,
+} from "@/components/chat/crypto";
 import { Github, GithubError, GithubLoading } from "@/components/chat/github";
 import { LoadingMessage } from "@/components/chat/message";
 import {
@@ -54,6 +59,11 @@ const TOOL_COMPONENT_MAP: ToolComponentMap = {
     loading: (props?: any) => <CalendlyLoading {...props} />,
     final: (props?: any) => <Calendly {...props} />,
     error: (props?: any) => <CalendlyError {...props} />,
+  },
+  "crypto-price": {
+    loading: (props?: any) => <CryptoPriceLoading {...props} />,
+    final: (props?: any) => <CryptoPrice {...props} />,
+    error: (props?: any) => <CryptoPriceError {...props} />,
   },
 };
 

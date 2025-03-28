@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir -p .secrets
           set -e  # Exit on any error
-          for secret in OPENAI_API_KEY TAVILY_API_KEY LANGCHAIN_API_KEY GITHUB_TOKEN CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY DB_PASSWORD DB_DIRECT_URL DB_USER DB_HOST; do
+          for secret in OPENAI_API_KEY TAVILY_API_KEY THEGRAPH_API_KEY LANGCHAIN_API_KEY GITHUB_TOKEN CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY DB_PASSWORD DB_DIRECT_URL DB_USER DB_HOST; do
             if ! gcloud secrets versions access latest --secret=$secret > .secrets/$secret; then
               echo "Failed to fetch secret: $secret"
               exit 1
@@ -70,6 +70,8 @@ jobs:
                 apiKey: $(cat .secrets/OPENAI_API_KEY)
               tavily:
                 apiKey: $(cat .secrets/TAVILY_API_KEY)
+              thegraph:
+                apiKey: $(cat .secrets/THEGRAPH_API_KEY)
               langchain:
                 apiKey: $(cat .secrets/LANGCHAIN_API_KEY)
               github:
