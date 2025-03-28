@@ -42,13 +42,13 @@ const CHAT_MODES: ChatMode[] = [
     isNew: true,
     description: "Use AI to research and analyze any topic in depth",
   },
-  {
-    name: "Uniswap Research",
-    path: "/uniswap-research",
-    icon: faMagnifyingGlassDollar,
-    isNew: true,
-    description: "Deep dive into Uniswap protocol and ecosystem",
-  },
+  // {
+  //   name: "Uniswap Research",
+  //   path: "/uniswap-research",
+  //   icon: faMagnifyingGlassDollar,
+  //   isNew: true,
+  //   description: "Deep dive into Uniswap protocol and ecosystem",
+  // },
 ];
 
 interface ModeSelectorProps {
