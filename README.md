@@ -1,3 +1,5 @@
+[Note: Project Archived. AI Engineering has moved rapidly since I built this bot.]
+
 # Connor's AI Representative
 
 This codebase implements a full-stack professional AI representative, designed to answer professional questions about Connor Haines. Visit the deployed project at: [connor-haines.com](http://connor-haines.com).
