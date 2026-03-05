@@ -1,4 +1,4 @@
-[Note: Project Archived. AI Engineering has moved rapidly since I built this bot, but this project set the stage for all I've learned since. Arguably, the part of this projec that holds up the most is the devops side. It's still a nice example of setting up a kubernetes app and deploying it with infra as code. It's been a while, but I remember learning some new networking things as I set up this project.]
+[Note: Project Archived. AI Engineering has moved rapidly since I built this bot, but this project set the stage for all I've learned since. Arguably, the part of this project that holds up the most is the devops side. It's still a nice example of setting up a kubernetes app and deploying it with infra as code. It's been a while, but I remember learning some new networking things as I set up this project.]
 
 # Connor's AI Representative
 
